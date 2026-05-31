@@ -2,6 +2,12 @@
 
 ## 赛道：Qwen Cloud Hackathon - Track 1: MemoryAgent
 
+- **官网**: https://qwencloud-hackathon.devpost.com/
+- **API控制台**: https://home.qwencloud.com/api-keys（Google/GitHub登录）
+- **模型**: `qwen3.6-plus`（OpenAI兼容SDK）
+- **Base URL**: 待验证（登录后可从API文档确认）
+- **Deadline**: 2026-07-10 05:00 GMT+8
+
 ---
 
 ## 核心概念
