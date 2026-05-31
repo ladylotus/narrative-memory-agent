@@ -127,6 +127,35 @@ W7 (7/8-7/10)  最终检查 + 提交
 
 ---
 
+---
+
+## 🧠 跨会话记忆（比赛核心要求）
+
+**要求原文：** "remembers user preferences, and makes increasingly accurate decisions across multi-turn, **cross-session** interactions"
+
+**一个误解：** 跨会话 ≠ 重开会话才算跨。**同一个聊天窗口里的多轮对话也属于 multi-turn interactions**。如果今天关了浏览器明天打开还能接着聊，就是 cross-session。
+
+**我们的满足路径：**
+
+```
+摄入小说 → 语义记忆固化（角色认知）
+    ↓
+用户与角色对话 → 每次选择写入情景记忆
+    ↓
+睡眠巩固 → 压缩/整合/遗忘 → 角色认知更新
+    ↓（关浏览器再打开）
+语义记忆不变 → 用户回来还能聊 → OOC检测精度↑
+```
+
+**需要显式补的内容：**
+- `memory/user_preferences.py` — 记录用户选过的选项、提问模式
+- `services/preference.py` — 从用户选择序列中提取偏好模式
+- 前端 `/ask` 返回时附带 user_preference context（提示模型更了解用户了）
+
+**现有架构覆盖度：** ✅ 三层记忆天然支持。只需补一个用户偏好模块。
+
+---
+
 ## 🔑 重要备忘
 
 - **提交前必须 repo 变 public** — 否则评审查不到
