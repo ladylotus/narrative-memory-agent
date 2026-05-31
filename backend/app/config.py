@@ -19,7 +19,7 @@ QWEN_BASE_URL: str = os.getenv(
     "QWEN_BASE_URL",
     "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
 )
-QWEN_MODEL: str = os.getenv("QWEN_MODEL", "qwen3.6-flash")
+QWEN_MODEL: str = os.getenv("QWEN_MODEL", "qwen3.6-plus")
 QWEN_EMBEDDING_MODEL: str = os.getenv("QWEN_EMBEDDING_MODEL", "text-embedding-v3")
 
 # --- Storage ---
