@@ -4,8 +4,8 @@
 
 - **官网**: https://qwencloud-hackathon.devpost.com/
 - **API控制台**: https://home.qwencloud.com/api-keys（Google/GitHub登录）
-- **模型**: `qwen3.6-plus`（OpenAI兼容SDK）
-- **Base URL**: 待验证（登录后可从API文档确认）
+- **模型**: `qwen3.6-flash`（已验证 ✅，`qwen3.6-plus`需付费激活）
+- **Base URL**: `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`（已验证 ✅）
 - **Deadline**: 2026-07-10 05:00 GMT+8
 
 ---
