@@ -131,28 +131,50 @@ W7 (7/8-7/10)  最终检查 + 提交
 
 ## 🧠 跨会话记忆（比赛核心要求）
 
-**要求原文：** "remembers user preferences, and makes increasingly accurate decisions across multi-turn, **cross-session** interactions"
+**官方原文（Qwen Cloud Hackathon 官网）：**
+> *"Build an Agent with persistent memory that autonomously accumulates experience, remembers user preferences, and makes increasingly accurate decisions across **multi-turn, cross-session interactions**."*
 
-**一个误解：** 跨会话 ≠ 重开会话才算跨。**同一个聊天窗口里的多轮对话也属于 multi-turn interactions**。如果今天关了浏览器明天打开还能接着聊，就是 cross-session。
+### 三个独立要求，缺一不可
 
-**我们的满足路径：**
+| 级别 | 含义 | 我们当前状态 |
+|------|------|-------------|
+| **Multi-turn** 🗣️ | 同一次对话里，A说完B回，不要断了就忘 | ✅ 工作记忆覆盖 |
+| **Cross-session** 🔄 | 关浏览器走人，明天回来开新会话，还记得昨天的事 | ⚠️ 架构扛得住，但需要显式设计 session resumption |
+| **User preferences** 🧑 | 系统知道你喜欢什么风格、上次选了哪个选项、习惯什么问法 | 🔴 还没写 |
 
+### 跨会话的行业定义
+
+来自 NirDiamant Agent Memory Bible（421 stars，业界定标仓库）[cross_session_memory.ipynb](https://github.com/NirDiamant/Agent_Memory_Techniques/blob/main/all_techniques/21_cross_session_memory/cross_session_memory.ipynb)：
+
+> *"Cross-session memory operates at the boundaries of sessions. It serializes state when a session ends and deserializes it when a new session starts."*
+
+核心机制：
 ```
-摄入小说 → 语义记忆固化（角色认知）
-    ↓
-用户与角色对话 → 每次选择写入情景记忆
-    ↓
-睡眠巩固 → 压缩/整合/遗忘 → 角色认知更新
-    ↓（关浏览器再打开）
-语义记忆不变 → 用户回来还能聊 → OOC检测精度↑
+Session 1: 用户来 → 对话 → 结束时保存状态
+                 ↓              ↑
+           持久化存储（SQLite + ChromaDB）
+                 ↓              ↑
+Session 2: 用户回来 → 加载记忆 → 续上对话
 ```
 
-**需要显式补的内容：**
-- `memory/user_preferences.py` — 记录用户选过的选项、提问模式
-- `services/preference.py` — 从用户选择序列中提取偏好模式
-- 前端 `/ask` 返回时附带 user_preference context（提示模型更了解用户了）
+### 我们的架构覆盖度
 
-**现有架构覆盖度：** ✅ 三层记忆天然支持。只需补一个用户偏好模块。
+| 组件 | 持久化？ | 用途 |
+|------|---------|------|
+| SQLite（events / characters） | ✅ 文件持久 | 情景记忆 + 语义记忆 |
+| ChromaDB（向量嵌入） | ✅ 文件持久 | 语义检索 |
+| 工作记忆 | ❌ 临时的 | 当前会话上下文，每次重建 |
+
+**依赖链：** SQLite 和 ChromaDB 都是文件持久 → 天然跨会话。用户关浏览器再打开，只要后端还在跑（或数据文件在），就记得昨天的事。
+
+### 需要显式补的内容
+
+- [ ] `services/session_resumption.py` — 启动时从 SQLite 加载之前的角色和记忆，重建工作记忆上下文
+- [ ] `memory/user_preferences.py` — 记录用户选过的选项、提问偏好
+- [ ] `services/preference.py` — 从用户选择序列中提取偏好模式
+- [ ] 前端 `/session/new` 端点 — 显式区分"第一次打开"vs"回访用户"（冷启动 vs 续接）
+- [ ] 后端启动时——若 SQLite 中有数据 → 跨会话加载；若空 → 冷启动欢迎页
+- [ ] 提交演示时——明确在 Demo 中展示：**\"昨天聊了Leo，今天打开还认识\"**
 
 ---
 
