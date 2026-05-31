@@ -68,6 +68,29 @@ Phase 3 - 自检报告：角色认知更新日志
 
 ---
 
+---
+
+## 📁 目录结构
+
+```
+├── README.md                     # 项目总览
+├── LICENSE                       # MIT 开源许可
+├── TODO.md                       # 进度跟踪（提交前归档）
+├── backend/                      # FastAPI 后端
+├── frontend/                     # Next.js 前端
+├── docs/
+│   ├── architecture.en.html      # 架构图（英文）
+│   └── architecture.zh.html      # 架构图（中文）
+└── internal/                     # 内部设计资料（不参与提交）
+    ├── 方案文档.md                # 设计思路
+    ├── 技术风险分析.md             # OOC 公式推导
+    ├── 市场验证.md                # 市场调研
+    ├── OOC公式-论文引用.md         # 理论溯源
+    └── design-inspiration/       # Claude Design UI 原型
+```
+
+---
+
 ## 参赛要求（需经常比对）
 
 ### Track 1: MemoryAgent
