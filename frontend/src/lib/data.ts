@@ -9,11 +9,11 @@ import type {
 } from "./types";
 
 export const NMA_NOVEL: Novel = {
-  title: "Frankenstein",
-  author: "Mary Shelley",
-  year: 1818,
-  chapters: 24,
-  emoji: "📖",
+  title: "Caelvorn",
+  author: "Jasmine",
+  year: 2025,
+  chapters: 12,
+  emoji: "🐺",
 };
 
 export const NMA_CHARACTERS: Character[] = [

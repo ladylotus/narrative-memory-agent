@@ -21,7 +21,7 @@ class EpisodicMemory:
 
     def __init__(self, db_path: Path | str = SQLITE_PATH) -> None:
         self._path = Path(db_path)
-        self._conn = sqlite3.connect(str(self._path))
+        self._conn = sqlite3.connect(str(self._path), check_same_thread=False)
         self._conn.row_factory = sqlite3.Row
         self._init_db()
 
@@ -84,6 +84,14 @@ class EpisodicMemory:
 
         rows = self._conn.execute(query, params).fetchall()
         return [dict(r) for r in rows]
+
+    def update_importance(self, event_id: str, new_importance: float) -> None:
+        """Update the importance score of an existing event."""
+        self._conn.execute(
+            "UPDATE events SET importance = ? WHERE id = ?",
+            (new_importance, event_id),
+        )
+        self._conn.commit()
 
     def count_events(self, protagonist: str | None = None) -> int:
         query = "SELECT COUNT(*) FROM events"

@@ -245,7 +245,7 @@ function Composer({
         <div className="composer-inner">
           <textarea
             rows={1}
-            placeholder={`💬 描述一个场景，或者问${shortName}会怎么做…`}
+            placeholder={`💬 Describe a scene, or ask ${shortName} what they would do…`}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -267,7 +267,7 @@ function Composer({
               }
             }}
           >
-            ➤
+            如果是你，你会？
           </button>
         </div>
       </div>

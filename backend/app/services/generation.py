@@ -1,12 +1,38 @@
-"""Circuit A — creative generation (character voice)."""
+"""Circuit A — creative generation (character voice) using Qwen API."""
 
 from __future__ import annotations
 
+import json
+import re
+from typing import Any
+
+from openai import AsyncOpenAI
+
+from app.config import QWEN_API_KEY, QWEN_BASE_URL, QWEN_MODEL
+from app.database import get_character
+
+
+_client: AsyncOpenAI | None = None
+
+
+def _get_client() -> AsyncOpenAI:
+    global _client
+    if _client is None:
+        _client = AsyncOpenAI(api_key=QWEN_API_KEY, base_url=QWEN_BASE_URL)
+    return _client
+
+
+# ──────────────────────────────────────────────
+#  GenerationService
+# ──────────────────────────────────────────────
 
 class GenerationService:
-    """Generate character responses in role — Circuit A.
+    """Generate character response options in role — Circuit A.
 
-    Uses Qwen API to produce multi-option character responses.
+    Reads the character profile from the database, builds a role-playing
+    prompt, and asks Qwen to produce ``num_options`` differentiated
+    development paths. Each option carries a brief description of its
+    "track" (safe / interesting / bold).
     """
 
     async def generate_options(
@@ -14,10 +40,99 @@ class GenerationService:
         character: str,
         question: str,
         num_options: int = 3,
-    ) -> list[dict]:
-        """Generate {num_options} development options in character's voice."""
-        # TODO: query semantic memory for character profile
-        # TODO: call Qwen with role prompt → generate N options
-        return [
-            {"label": "A", "description": "Not implemented", "ooc_risk": 0.0},
-        ]
+    ) -> list[dict[str, Any]]:
+        profile = get_character(character)
+        if profile is None:
+            raise ValueError(f"Character '{character}' not found in database")
+
+        traits = profile.get("traits", [])
+        trait_desc = "; ".join(
+            f"{t.get('name', '?')} ({t.get('category', 'core')}): {t.get('description', '')}"
+            for t in traits
+        )
+
+        # Build the prompt
+        system_prompt = (
+            f"You are {profile['name']}.\n"
+            f"Backstory: {profile.get('backstory', '')}\n"
+            f"Core traits: {trait_desc}\n"
+            f"Motivation: {profile.get('motivation', '')}\n"
+            f"Current arc stage: {profile.get('arc_stage', 'unknown')}\n"
+            f"\n"
+            f"You are a character in a novel. A reader/author asks you a question "
+            f"about what you would do in a given situation.\n"
+            f"Answer **in first person**, in your own voice and style.\n"
+            f"Speak naturally — you don't have to explain yourself.\n"
+            f"You can be uncertain, decisive, conflicted, or mysterious — whatever fits.\n"
+        )
+
+        user_prompt = (
+            f"The reader asks you: \"{question}\"\n\n"
+            f"Give me {num_options} different possible responses you might give.\n"
+            f"They should represent **distinctly different directions** you could take — "
+            f"for example:\n"
+            f"- One that stays closest to your core nature (safe/expected)\n"
+            f"- One that explores a less obvious side of you (interesting/surprising)\n"
+            f"- One that is bold or unexpected but still plausibly you\n"
+            f"\n"
+            f"Return ONLY valid JSON in this exact format, no other text:\n"
+            f'{{"options": [\n'
+            f'  {{"label": "A", "title": "short title", "voice": "the full response in first person"}},\n'
+            f'  {{"label": "B", "title": "short title", "voice": "the full response in first person"}},\n'
+            f'  ...\n'
+            f"]}}\n"
+        )
+
+        client = _get_client()
+        resp = await client.chat.completions.create(
+            model=QWEN_MODEL,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
+            temperature=0.8,
+            max_tokens=2048,
+        )
+
+        content = resp.choices[0].message.content or "{}"
+        return self._parse_options(content)
+
+    # ── helpers ────────────────────────────────
+
+    @staticmethod
+    def _parse_options(raw: str) -> list[dict[str, Any]]:
+        """Extract the JSON from the LLM response (handles wrapping)."""
+        # Try to find a JSON block
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if not match:
+            return _fallback_options(raw)
+
+        try:
+            data = json.loads(match.group())
+        except json.JSONDecodeError:
+            return _fallback_options(raw)
+
+        options = data.get("options", [])
+        if not options:
+            return _fallback_options(raw)
+
+        # Normalise keys & apply defaults
+        out = []
+        for i, opt in enumerate(options):
+            out.append({
+                "label": opt.get("label", chr(65 + i)),
+                "title": opt.get("title", f"Option {chr(65 + i)}"),
+                "voice": opt.get("voice", opt.get("text", "")),
+            })
+        return out
+
+
+def _fallback_options(raw: str) -> list[dict[str, Any]]:
+    """Last resort — wrap the raw response as a single option."""
+    return [
+        {
+            "label": "A",
+            "title": "Response",
+            "voice": raw[:500],
+        },
+    ]

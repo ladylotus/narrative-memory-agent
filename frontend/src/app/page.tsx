@@ -1,42 +1,115 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import ConversationView from "@/components/ConversationView";
 import ProfileView from "@/components/ProfileView";
 import SleepLogView from "@/components/SleepLogView";
 import SettingsView from "@/components/SettingsView";
+import IngestionView from "@/components/IngestionView";
 import {
-  NMA_CHARACTERS,
-  NMA_NOVEL,
-  NMA_SCENE,
-  NMA_OPTIONS,
-  NMA_FOLLOWUP,
-  NMA_PROFILE,
-  NMA_LOG,
-  freshConvo,
-} from "@/lib/data";
+  fetchCharacters,
+  askCharacter,
+  fetchProfile,
+  triggerSleep,
+} from "@/lib/api";
+import { NMA_NOVEL, freshConvo } from "@/lib/data";
+import type { Character, Option, ConvoState, Scene } from "@/lib/types";
+import type { SleepReport } from "@/lib/sleep-types";
 
 export default function Home() {
-  const [activeChar, setActiveChar] = useState("victor");
+  const [characters, setCharacters] = useState<Character[]>([]);
+  const [activeChar, setActiveChar] = useState<string>("");
   const [view, setView] = useState("conversation");
-  const [convoMap, setConvoMap] = useState<Record<string, ReturnType<typeof freshConvo>>>(
-    () => ({ victor: freshConvo() })
-  );
+  const [convoMap, setConvoMap] = useState<Record<string, ConvoState>>({});
+  const [scene, setScene] = useState<Scene | null>(null);
+  const [options, setOptions] = useState<Option[]>([]);
+  const [profile, setProfile] = useState<any>(null);
+  const [sleepReport, setSleepReport] = useState<SleepReport | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const char = NMA_CHARACTERS.find((c) => c.id === activeChar)!;
+  // Load character list on mount
+  useEffect(() => {
+    fetchCharacters().then((chars) => {
+      setCharacters(chars);
+      if (chars.length > 0) {
+        setActiveChar(chars[0].id);
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  // When active character changes, load profile + build initial scene
+  useEffect(() => {
+    if (!activeChar) return;
+    const char = characters.find((c) => c.id === activeChar);
+    if (!char) return;
+
+    fetchProfile(activeChar).then((p) => {
+      setProfile(p);
+      // Build an initial scene from the character's backstory
+      if (p) {
+        setScene({
+          eyebrow: `📖 ${char.name} · 当前状态`,
+          text: `你面前站着${char.name}。${
+            (p as any)?.arc_stage
+              ? `他的弧光阶段：${(p as any).arc_stage}。`
+              : ""
+          }`,
+          question: `你想问${char.name.split(" ")[0]}什么？`,
+        });
+      }
+    });
+    // Reset conversation state
+    setOptions([]);
+    setSleepReport(null);
+  }, [activeChar, characters]);
+
+  const activeCharacter = characters.find((c) => c.id === activeChar);
   const convo = convoMap[activeChar] ?? freshConvo();
-  const profile = NMA_PROFILE[activeChar];
-  const hasContent = activeChar === "victor"; // Victor has scene data
 
   const updateConvo = useCallback(
-    (patch: Partial<ReturnType<typeof freshConvo>>) => {
+    (patch: Partial<ConvoState>) => {
       setConvoMap((prev) => ({
         ...prev,
-        [activeChar]: { ...prev[activeChar] ?? freshConvo(), ...patch },
+        [activeChar]: { ...(prev[activeChar] ?? freshConvo()), ...patch },
       }));
     },
     [activeChar]
+  );
+
+  const handleSend = useCallback(
+    async (text: string) => {
+      if (!activeChar) return;
+      updateConvo({ thinking: true });
+
+      // Build context from scene + user question
+      const fullQuestion = scene
+        ? `${scene.text}\n\n${text}`
+        : text;
+
+      try {
+        const result = await askCharacter(activeChar, fullQuestion, 3);
+        setScene((prev) =>
+          prev
+            ? { ...prev, text: fullQuestion, question: "你会怎么做？" }
+            : prev
+        );
+        setOptions(result.options);
+
+        const prev = convoMap[activeChar] ?? freshConvo();
+        updateConvo({
+          thinking: false,
+          turns: [
+            ...prev.turns,
+            { text, options: result.options },
+          ],
+        });
+      } catch {
+        updateConvo({ thinking: false });
+      }
+    },
+    [activeChar, scene, convoMap, updateConvo]
   );
 
   const actions = {
@@ -44,27 +117,63 @@ export default function Home() {
     onFeedback: (v: string) => updateConvo({ feedback: v }),
     onNote: (v: string) => updateConvo({ note: v }),
     onSubmit: () => updateConvo({ submitted: true }),
-    onSend: (text: string) => {
-      const prev = convoMap[activeChar] ?? freshConvo();
-      updateConvo({
-        thinking: true,
-        turns: [...prev.turns, { text, options: NMA_FOLLOWUP.options }],
-      });
-      setTimeout(() => updateConvo({ thinking: false }), 1500);
-    },
+    onSend: handleSend,
   };
+
+  const handleSelectChar = useCallback((id: string) => {
+    setActiveChar(id);
+    setView("conversation");
+  }, []);
+
+  const handleRunSleep = useCallback(async () => {
+    if (!activeChar) return;
+    setSleepReport(null);
+    const report = await triggerSleep(activeChar);
+    if (report) {
+      setSleepReport(report);
+      setView("sleeplog");
+    }
+  }, [activeChar]);
+
+  const handleRefreshCharacters = useCallback(() => {
+    fetchCharacters().then(setCharacters);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="app-shell">
+        <div className="main-content" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="thinking fadein">
+            <span className="pulse"><i /><i /><i /></span>
+            🔮 正在连接记忆引擎…
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!activeCharacter) {
+    return (
+      <div className="app-shell">
+        <div className="main-content" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <div className="empty">
+            <div className="e-mark">📖</div>
+            <div className="e-title">暂无角色</div>
+            <div className="e-desc">还没有小说被摄入。先导入一部作品吧。</div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-shell">
       <Sidebar
-        characters={NMA_CHARACTERS}
+        characters={characters}
         activeChar={activeChar}
         novel={NMA_NOVEL}
         view={view}
-        onSelectChar={(id) => {
-          setActiveChar(id);
-          setView("conversation");
-        }}
+        onSelectChar={handleSelectChar}
         onNav={setView}
       />
 
@@ -78,6 +187,7 @@ export default function Home() {
             { id: "conversation", label: "💬 对话" },
             { id: "profile", label: "🧠 档案" },
             { id: "sleeplog", label: "💤 巩固日志" },
+            { id: "ingestion", label: "📖 小说" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -102,19 +212,26 @@ export default function Home() {
 
         {view === "conversation" && (
           <ConversationView
-            char={char}
-            scene={NMA_SCENE}
-            options={NMA_OPTIONS}
+            char={activeCharacter}
+            scene={scene ?? { eyebrow: "", text: "", question: `你想问${activeCharacter.name.split(" ")[0]}什么？` }}
+            options={options}
             convo={convo}
             actions={actions}
-            hasContent={hasContent}
+            hasContent={!!scene}
           />
         )}
         {view === "profile" && (
-          <ProfileView char={char} profile={profile} />
+          <ProfileView char={activeCharacter} profile={profile ?? undefined} />
         )}
         {view === "sleeplog" && (
-          <SleepLogView char={char} log={NMA_LOG} />
+          <SleepLogView
+            char={activeCharacter}
+            report={sleepReport}
+            onRunSleep={handleRunSleep}
+          />
+        )}
+        {view === "ingestion" && (
+          <IngestionView onCharactersCreated={handleRefreshCharacters} />
         )}
         {view === "settings" && (
           <SettingsView novel={NMA_NOVEL} />

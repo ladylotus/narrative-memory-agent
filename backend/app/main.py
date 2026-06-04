@@ -4,14 +4,30 @@ from __future__ import annotations
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.api import ask, ingest, profile, sleep
+from app.seed import seed_demo_character
 
 app = FastAPI(
     title="Narrative Memory Agent",
     description="Qwen Cloud Hackathon — Track 1: MemoryAgent",
     version="0.1.0",
 )
+
+# Allow frontend (localhost:3000) to call backend (localhost:8000)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Seed demo data on startup
+@app.on_event("startup")
+async def startup() -> None:
+    seed_demo_character()
 
 app.include_router(ingest.router, prefix="/ingest", tags=["ingest"])
 app.include_router(ask.router, prefix="/ask", tags=["ask"])
