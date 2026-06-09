@@ -13,9 +13,9 @@ const API = "http://localhost:8000";
 interface BOption {
   title: string;
   voice: string;
-  ooc_scores: Record<string, number>;
   ooc_risk: number;
   ooc_summary: string;
+  ooc_details: Record<string, number | string>; // includes T/B/D/C/P
 }
 
 interface BAskResp {
@@ -168,6 +168,26 @@ export async function triggerSleep(name: string): Promise<BSleepResp["report"] |
   return data.report ?? null;
 }
 
+/** Submit user feedback on a chosen option → updates Generation Bias. */
+export async function submitFeedback(
+  character: string,
+  optionLabel: string,
+  scores: Record<string, number>,
+  marks: string[],
+): Promise<{ updated: boolean; preferred_profile: number[] | null }> {
+  const res = await fetch(`${API}/feedback/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ character, option_label: optionLabel, scores, marks }),
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    console.warn("Feedback submission failed:", err);
+    return { updated: false, preferred_profile: null };
+  }
+  return res.json();
+}
+
 // ── Internal helpers ───────────────────────────────────
 
 function mapOption(opt: BOption, idx: number): Option {
@@ -183,6 +203,13 @@ function mapOption(opt: BOption, idx: number): Option {
     high: "❌ 崩人设",
   };
 
+  // Extract T/B/D/C/P from ooc_details
+  const scores: Record<string, number> = {};
+  for (const k of ["T", "B", "D", "C", "P"]) {
+    const v = opt.ooc_details?.[k];
+    scores[k] = typeof v === "number" ? v : 0.5;
+  }
+
   return {
     idx: `Direction ${String(idx + 1).padStart(2, "0")}`,
     title: opt.title,
@@ -190,5 +217,6 @@ function mapOption(opt: BOption, idx: number): Option {
     tag: opt.ooc_summary || labels[level],
     tagNew: false,
     risk: { level, label: labels[level], pct },
+    oocScores: scores,
   };
 }

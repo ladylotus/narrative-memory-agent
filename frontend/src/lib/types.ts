@@ -29,6 +29,7 @@ export interface Option {
   tag: string;
   tagNew: boolean;
   risk: Risk;
+  oocScores: Record<string, number>; // T/B/D/C/P from backend
 }
 
 export interface Scene {
@@ -44,7 +45,7 @@ export interface Turn {
 
 export interface ConvoState {
   chosen: number | null;
-  feedback: string | null;
+  marks: string[];          // selected mark reasons
   note: string;
   submitted: boolean;
   turns: Turn[];

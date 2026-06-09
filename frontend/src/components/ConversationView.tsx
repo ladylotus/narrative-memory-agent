@@ -2,6 +2,14 @@
 
 import type { Option, Risk, Scene, Character, ConvoState, Turn } from "@/lib/types";
 
+/* ─── Mark options ─────────────────────────── */
+const MARK_OPTIONS = [
+  { value: "这就是他会做的事", label: "这就是他会做的事", icon: "🎯" },
+  { value: "情节需要这个走向", label: "情节需要这个走向", icon: "📜" },
+  { value: "想看看这个可能性", label: "想看看这个可能性", icon: "🔮" },
+  { value: "说不上来，就是感觉", label: "说不上来，就是感觉", icon: "🤔" },
+] as const;
+
 /* ─── RiskBadge ─── */
 function RiskBadge({ risk }: { risk: Risk }) {
   return (
@@ -46,18 +54,18 @@ function OptionCard({
 /* ─── FeedbackBar ─── */
 function FeedbackBar({
   characterName,
-  feedback,
+  marks,
   note,
   submitted,
-  onFeedback,
+  onToggleMark,
   onNote,
   onSubmit,
 }: {
   characterName: string;
-  feedback: string | null;
+  marks: string[];
   note: string;
   submitted: boolean;
-  onFeedback: (v: string) => void;
+  onToggleMark: (v: string) => void;
   onNote: (v: string) => void;
   onSubmit: () => void;
 }) {
@@ -65,7 +73,7 @@ function FeedbackBar({
     return (
       <div className="feedback fadein">
         <div className="fb-done" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--risk-low)" }}>
-          ✅ 已存入记忆 · 将在今晚的巩固周期中处理
+          ✅ 已存入记忆 · 将在下次生成中参考你的偏好
         </div>
       </div>
     );
@@ -73,21 +81,20 @@ function FeedbackBar({
 
   return (
     <div className="feedback fadein">
-      <div className="fb-q">🎯 像{characterName}吗？</div>
-      <div className="fb-opts">
-        {[
-          { v: "fits", label: "✅ 很像" },
-          { v: "drift", label: "⚠️ 有点偏" },
-          { v: "off", label: "❌ 完全不像" },
-        ].map((o) => (
-          <button
-            key={o.v}
-            className={`fb-btn${feedback === o.v ? " sel" : ""}`}
-            onClick={() => onFeedback(o.v)}
-          >
-            {o.label}
-          </button>
-        ))}
+      <div className="fb-q">💡 你选这个是因为……？</div>
+      <div className="fb-marks">
+        {MARK_OPTIONS.map((o) => {
+          const sel = marks.includes(o.value);
+          return (
+            <button
+              key={o.value}
+              className={`fb-mark${sel ? " sel" : ""}`}
+              onClick={() => onToggleMark(o.value)}
+            >
+              {sel ? "☑" : "□"} {o.label}
+            </button>
+          );
+        })}
       </div>
       <div className="fb-note">
         <textarea
@@ -97,7 +104,7 @@ function FeedbackBar({
         />
       </div>
       <div className="row-actions">
-        <button className="btn primary" disabled={!feedback} onClick={onSubmit}>
+        <button className="btn primary" disabled={marks.length === 0} onClick={onSubmit}>
           💾 存入记忆
         </button>
       </div>
@@ -120,7 +127,7 @@ export default function ConversationView({
   convo: ConvoState;
   actions: {
     onChoose: (i: number) => void;
-    onFeedback: (v: string) => void;
+    onToggleMark: (v: string) => void;
     onNote: (v: string) => void;
     onSubmit: () => void;
     onSend: (text: string) => void;
@@ -180,10 +187,10 @@ export default function ConversationView({
         {anyChosen && (
           <FeedbackBar
             characterName={shortName}
-            feedback={convo.feedback}
+            marks={convo.marks}
             note={convo.note}
             submitted={convo.submitted}
-            onFeedback={actions.onFeedback}
+            onToggleMark={actions.onToggleMark}
             onNote={actions.onNote}
             onSubmit={actions.onSubmit}
           />

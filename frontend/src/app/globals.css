@@ -522,14 +522,19 @@ body {
   gap: 6px;
 }
 
-.fb-opts {
+.fb-marks {
   display: flex;
-  gap: 6px;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 4px;
 }
 
-.fb-btn {
-  padding: 6px 14px;
-  border-radius: 20px;
+.fb-mark {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-sm);
   border: 1px solid var(--line);
   background: none;
   color: var(--ink-2);
@@ -537,16 +542,18 @@ body {
   cursor: pointer;
   transition: all 0.15s;
   font-family: inherit;
+  text-align: left;
 }
 
-.fb-btn:hover {
+.fb-mark:hover {
   border-color: var(--line-strong);
+  background: var(--panel-2);
   color: var(--ink);
 }
 
-.fb-btn.sel {
-  background: var(--accent-soft);
+.fb-mark.sel {
   border-color: var(--accent);
+  background: var(--accent-soft);
   color: var(--accent);
 }
 

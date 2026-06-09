@@ -12,6 +12,7 @@ import {
   askCharacter,
   fetchProfile,
   triggerSleep,
+  submitFeedback,
 } from "@/lib/api";
 import { NMA_NOVEL, freshConvo } from "@/lib/data";
 import type { Character, Option, ConvoState, Scene } from "@/lib/types";
@@ -114,9 +115,27 @@ export default function Home() {
 
   const actions = {
     onChoose: (i: number) => updateConvo({ chosen: i }),
-    onFeedback: (v: string) => updateConvo({ feedback: v }),
+    onToggleMark: (v: string) => {
+      const current = convo.marks;
+      const next = current.includes(v)
+        ? current.filter((m) => m !== v)
+        : [...current, v];
+      updateConvo({ marks: next });
+    },
     onNote: (v: string) => updateConvo({ note: v }),
-    onSubmit: () => updateConvo({ submitted: true }),
+    onSubmit: async () => {
+      if (!activeChar || convo.chosen === null || convo.chosen === undefined) return;
+      const chosenOpt = options[convo.chosen];
+      if (!chosenOpt) return;
+
+      await submitFeedback(
+        activeChar,
+        chosenOpt.idx,
+        chosenOpt.oocScores,
+        convo.marks,
+      );
+      updateConvo({ submitted: true });
+    },
     onSend: handleSend,
   };
 

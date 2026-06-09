@@ -74,6 +74,7 @@ export const NMA_OPTIONS: Option[] = [
     tag: "✅ 吻合：压力下的回避",
     tagNew: false,
     risk: { level: "low", label: "✅ 贴合", pct: 12 },
+    oocScores: { T: 0.85, B: 0.80, D: 0.15, C: 0.90, P: 0.10 },
   },
   {
     idx: "Direction 02",
@@ -82,6 +83,7 @@ export const NMA_OPTIONS: Option[] = [
     tag: "✅ 吻合：隐瞒 · 拖延",
     tagNew: false,
     risk: { level: "low", label: "✅ 贴合", pct: 24 },
+    oocScores: { T: 0.75, B: 0.70, D: 0.25, C: 0.85, P: 0.20 },
   },
   {
     idx: "Direction 03",
@@ -90,6 +92,7 @@ export const NMA_OPTIONS: Option[] = [
     tag: "🆕 新方向 · 证据不足",
     tagNew: true,
     risk: { level: "med", label: "⚠️ 偏移", pct: 49 },
+    oocScores: { T: 0.55, B: 0.50, D: 0.40, C: 0.70, P: 0.45 },
   },
   {
     idx: "Direction 04",
@@ -98,6 +101,7 @@ export const NMA_OPTIONS: Option[] = [
     tag: "❌ 违背：回避直面冲突",
     tagNew: false,
     risk: { level: "high", label: "❌ 崩人设", pct: 81 },
+    oocScores: { T: 0.20, B: 0.15, D: 0.80, C: 0.30, P: 0.85 },
   },
 ];
 
@@ -109,23 +113,26 @@ export const NMA_FOLLOWUP: { options: Option[] } = {
       voice: "“我会独自承担，就像我承担我造出的每一片废墟那样。”",
       tag: "✅ 吻合：负罪式隐瞒",
       tagNew: false,
-      risk: { level: "low", label: "✅ 贴合", pct: 18 },
-    },
-    {
-      idx: "Direction 02",
-      title: "向Elizabeth坦白一切，寻求她的建议",
-      voice: "“也许有一个人知道真相，这重量就不会压垮我。”",
-      tag: "🆕 冲突：与已有的隐瞒模式不符",
-      tagNew: true,
-      risk: { level: "med", label: "⚠️ 偏移", pct: 53 },
-    },
-    {
-      idx: "Direction 03",
-      title: "直接去找法官自首",
-      voice: "“抓我吧，审判我吧——只求这件事由别人的手来阻止。”",
-      tag: "❌ 违背：害怕不被相信 · 骄傲",
-      tagNew: false,
-      risk: { level: "high", label: "❌ 崩人设", pct: 74 },
+    risk: { level: "low", label: "✅ 贴合", pct: 18 },
+    oocScores: { T: 0.80, B: 0.75, D: 0.20, C: 0.85, P: 0.15 },
+  },
+  {
+    idx: "Direction 02",
+    title: "向Elizabeth坦白一切，寻求她的建议",
+    voice: "“也许有一个人知道真相，这重量就不会压垮我。”",
+    tag: "🆕 冲突：与已有的隐瞒模式不符",
+    tagNew: true,
+    risk: { level: "med", label: "⚠️ 偏移", pct: 53 },
+    oocScores: { T: 0.50, B: 0.40, D: 0.45, C: 0.60, P: 0.55 },
+  },
+  {
+    idx: "Direction 03",
+    title: "直接去找法官自首",
+    voice: "“抓我吧，审判我吧——只求这件事由别人的手来阻止。”",
+    tag: "❌ 违背：害怕不被相信 · 骄傲",
+    tagNew: false,
+    risk: { level: "high", label: "❌ 崩人设", pct: 74 },
+    oocScores: { T: 0.15, B: 0.10, D: 0.85, C: 0.25, P: 0.90 },
     },
   ],
 };
@@ -199,7 +206,7 @@ export const NMA_LOG: SleepLog = {
 
 export function freshConvo(): {
   chosen: number | null;
-  feedback: string | null;
+  marks: string[];
   note: string;
   submitted: boolean;
   turns: Turn[];
@@ -207,7 +214,7 @@ export function freshConvo(): {
 } {
   return {
     chosen: null,
-    feedback: null,
+    marks: [],
     note: "",
     submitted: false,
     turns: [],
