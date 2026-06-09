@@ -35,11 +35,28 @@ class VectorStore:
         collection: str,
         query_embedding: list[float],
         top_k: int = 10,
+        where: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
-        results = self._collection(collection).query(
-            query_embeddings=[query_embedding],
-            n_results=top_k,
-        )
+        """Search the collection by embedding vector similarity.
+
+        Args:
+            collection: Name of the ChromaDB collection.
+            query_embedding: The embedding vector to search with.
+            top_k: Maximum number of results to return.
+            where: Optional metadata filter dict (e.g. ``{"protagonist": "Caelan"}``).
+
+        Returns:
+            List of ``{id, score (distance), metadata}`` dicts sorted by
+            increasing distance (most similar first).
+        """
+        kwargs: dict[str, Any] = {
+            "query_embeddings": [query_embedding],
+            "n_results": top_k,
+        }
+        if where:
+            kwargs["where"] = where
+
+        results = self._collection(collection).query(**kwargs)
         output = []
         for i in range(len(results["ids"][0])):
             output.append({

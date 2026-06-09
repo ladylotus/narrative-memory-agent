@@ -5,6 +5,7 @@ from __future__ import annotations
 from fastapi import APIRouter, HTTPException
 
 from app.models import AskRequest, AskResponse, Option
+from app.memory.working import WorkingMemory
 from app.services.generation import GenerationService
 from app.services.validation import ValidationService
 
@@ -12,16 +13,33 @@ router = APIRouter()
 gen = GenerationService()
 val = ValidationService()
 
+# Per-character working memory buffers
+_sessions: dict[str, WorkingMemory] = {}
+
+
+def _get_wm(character: str) -> WorkingMemory:
+    """Get or create working memory for a character."""
+    if character not in _sessions:
+        _sessions[character] = WorkingMemory()
+    return _sessions[character]
+
 
 @router.post("/", response_model=AskResponse)
 async def ask_character(body: AskRequest):
-    """Ask a character: Circuit A (generation) + Circuit B (validation)."""
+    """Ask a character: Circuit A (generation) + Circuit B (validation).
+
+    Injects recent conversation history from WorkingMemory so the
+    character remembers previous exchanges within the same session.
+    """
     try:
-        # Circuit A: generate options
+        wm = _get_wm(body.character)
+
+        # Circuit A: generate options with working memory context
         raw_options = await gen.generate_options(
             character=body.character,
             question=body.question,
             num_options=body.num_options,
+            context_history=wm.get_context(),
         )
 
         # Circuit B: validate each option
@@ -61,6 +79,9 @@ async def ask_character(body: AskRequest):
                     "reason": score.get("reason", ""),
                 },
             ))
+
+        # Record user question in working memory
+        wm.add(role="user", content=body.question)
 
         return AskResponse(
             character=body.character,

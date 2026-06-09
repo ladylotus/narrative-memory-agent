@@ -10,6 +10,8 @@ from openai import AsyncOpenAI
 
 from app.config import QWEN_API_KEY, QWEN_BASE_URL, QWEN_MODEL
 from app.database import get_character
+from app.memory.working import Turn
+from app.services.bias_prompt import profile_to_bias_prompt
 
 
 _client: AsyncOpenAI | None = None
@@ -33,6 +35,10 @@ class GenerationService:
     prompt, and asks Qwen to produce ``num_options`` differentiated
     development paths. Each option carries a brief description of its
     "track" (safe / interesting / bold).
+
+    When ``context_history`` is provided (from WorkingMemory), previous
+    conversation turns are injected so the character acts with awareness
+    of what has already been discussed.
     """
 
     async def generate_options(
@@ -40,6 +46,7 @@ class GenerationService:
         character: str,
         question: str,
         num_options: int = 3,
+        context_history: list[Turn] | None = None,
     ) -> list[dict[str, Any]]:
         profile = get_character(character)
         if profile is None:
@@ -47,11 +54,12 @@ class GenerationService:
 
         traits = profile.get("traits", [])
         trait_desc = "; ".join(
-            f"{t.get('name', '?')} ({t.get('category', 'core')}): {t.get('description', '')}"
+            f"{t.get('name', '?')} ({t.get('category', 'core')}): "
+            f"{t.get('description', '')}"
             for t in traits
         )
 
-        # Build the prompt
+        # ── System prompt (always present) ──────────────────────
         system_prompt = (
             f"You are {profile['name']}.\n"
             f"Backstory: {profile.get('backstory', '')}\n"
@@ -63,22 +71,51 @@ class GenerationService:
             f"about what you would do in a given situation.\n"
             f"Answer **in first person**, in your own voice and style.\n"
             f"Speak naturally — you don't have to explain yourself.\n"
-            f"You can be uncertain, decisive, conflicted, or mysterious — whatever fits.\n"
+            f"You can be uncertain, decisive, conflicted, or mysterious — "
+            f"whatever fits.\n"
         )
 
+        # ── Conversation history from WorkingMemory ─────────────
+        if context_history:
+            turns_text = "\n".join(
+                f"{'Reader' if t.role == 'user' else 'You'}: {t.content}"
+                for t in context_history
+            )
+            system_prompt += (
+                f"\n"
+                f"Conversation so far:\n"
+                f"{turns_text}\n"
+            )
+
+        # ── Generation Bias: preferred_profile ──────────────────
+        preferred = profile.get("preferred_profile")
+        if preferred and isinstance(preferred, list) and len(preferred) >= 5:
+            bias_text = profile_to_bias_prompt(preferred)
+            if bias_text:
+                system_prompt += (
+                    f"\n"
+                    f"---\n"
+                    f"{bias_text}\n"
+                    f"---\n"
+                )
+
+        # ── User prompt ─────────────────────────────────────────
         user_prompt = (
-            f"The reader asks you: \"{question}\"\n\n"
+            f"The reader now asks you: \"{question}\"\n\n"
             f"Give me {num_options} different possible responses you might give.\n"
-            f"They should represent **distinctly different directions** you could take — "
-            f"for example:\n"
+            f"They should represent **distinctly different directions** you could "
+            f"take — for example:\n"
             f"- One that stays closest to your core nature (safe/expected)\n"
-            f"- One that explores a less obvious side of you (interesting/surprising)\n"
+            f"- One that explores a less obvious side of you "
+            f"(interesting/surprising)\n"
             f"- One that is bold or unexpected but still plausibly you\n"
             f"\n"
             f"Return ONLY valid JSON in this exact format, no other text:\n"
             f'{{"options": [\n'
-            f'  {{"label": "A", "title": "short title", "voice": "the full response in first person"}},\n'
-            f'  {{"label": "B", "title": "short title", "voice": "the full response in first person"}},\n'
+            f'  {{"label": "A", "title": "short title", '
+            f'"voice": "the full response in first person"}},\n'
+            f'  {{"label": "B", "title": "short title", '
+            f'"voice": "the full response in first person"}},\n'
             f'  ...\n'
             f"]}}\n"
         )
