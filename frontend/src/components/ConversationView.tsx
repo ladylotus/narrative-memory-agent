@@ -13,8 +13,10 @@ const MARK_OPTIONS = [
 
 /* ─── RiskBadge ─── */
 function RiskBadge({ risk }: { risk: Risk }) {
+  let cls = `risk ${risk.level}`;
+  if (risk.type === "surprise") cls += " surprise";
   return (
-    <span className={`risk ${risk.level}`}>
+    <span className={cls}>
       {risk.label} · {risk.pct}%
     </span>
   );

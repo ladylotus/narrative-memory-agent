@@ -20,6 +20,7 @@ export interface Risk {
   level: "low" | "med" | "high";
   label: string;
   pct: number;
+  type?: "violation" | "surprise" | "normal";
 }
 
 export interface Option {

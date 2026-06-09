@@ -197,11 +197,21 @@ function mapOption(opt: BOption, idx: number): Option {
   else if (opt.ooc_risk < 0.6) level = "med";
   else level = "high";
 
+  // Classify high risk: violation vs surprise
+  const oocType = (opt.ooc_details?.type as string) || "normal";
+
   const labels: Record<string, string> = {
     low: "✅ 贴合",
     med: "⚠️ 偏移",
     high: "❌ 崩人设",
   };
+
+  // Override high-risk label based on violation/surprise type
+  let label = labels[level];
+  if (level === "high") {
+    if (oocType === "violation") label = "🚫 偏离角色";
+    else if (oocType === "surprise") label = "🟠 出乎意料";
+  }
 
   // Extract T/B/D/C/P from ooc_details
   const scores: Record<string, number> = {};
@@ -214,9 +224,9 @@ function mapOption(opt: BOption, idx: number): Option {
     idx: `Direction ${String(idx + 1).padStart(2, "0")}`,
     title: opt.title,
     voice: opt.voice,
-    tag: opt.ooc_summary || labels[level],
+    tag: opt.ooc_summary || label,
     tagNew: false,
-    risk: { level, label: labels[level], pct },
+    risk: { level, label, pct, type: oocType as "violation" | "surprise" | "normal" },
     oocScores: scores,
   };
 }

@@ -71,6 +71,7 @@ async def ask_character(body: AskRequest):
                     "text": opt.get("voice", ""),
                     "level": risk_level,
                     "tag": tag,
+                    "type": details.get("type", "normal"),
                     "T": details.get("T"),
                     "B": details.get("B"),
                     "D": details.get("D"),

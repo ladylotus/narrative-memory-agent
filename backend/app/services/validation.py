@@ -150,6 +150,15 @@ class ValidationService:
                 "D_source": "chromadb",
             }
 
+            # Classify: violation (low T/B/C) vs surprise (high P, OK consistency)
+            consistency = (t + b + c) / 3.0
+            if risk >= 0.66 and consistency < 0.4:
+                score["details"]["type"] = "violation"
+            elif risk >= 0.66 and p >= 0.6 and consistency >= 0.4:
+                score["details"]["type"] = "surprise"
+            else:
+                score["details"]["type"] = "normal"
+
         return raw_scores
 
     # ── ChromaDB semantic distance ───────────────
@@ -255,7 +264,7 @@ def _fallback_scores(count: int) -> list[dict[str, Any]]:
             "P": 0.0,
             "ooc_risk": 0.5,
             "reason": "fallback — unable to parse LLM response",
-            "details": {"T": 0.5, "B": 0.5, "D": 0.5, "C": 0.5, "P": 0.0, "D_source": "fallback"},
+            "details": {"T": 0.5, "B": 0.5, "D": 0.5, "C": 0.5, "P": 0.0, "D_source": "fallback", "type": "normal"},
         }
         for i in range(count)
     ]
