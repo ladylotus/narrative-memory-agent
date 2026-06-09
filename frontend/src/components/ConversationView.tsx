@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import type { Option, Risk, Scene, Character, ConvoState, Turn } from "@/lib/types";
 
 /* ─── Mark options ─────────────────────────── */
@@ -120,6 +121,7 @@ export default function ConversationView({
   convo,
   actions,
   hasContent,
+  feedbackPreference = "always",
 }: {
   char: Character;
   scene: Scene;
@@ -133,8 +135,29 @@ export default function ConversationView({
     onSend: (text: string) => void;
   };
   hasContent: boolean;
+  feedbackPreference?: "always" | "on-ooc" | "never";
 }) {
   const shortName = char.name.split(" ")[0];
+
+  // Auto-submit based on feedback preference
+  const shouldAutoSubmit =
+    feedbackPreference === "never" ||
+    (feedbackPreference === "on-ooc" &&
+      convo.chosen !== null &&
+      !convo.submitted &&
+      options[convo.chosen]?.risk.level !== "high");
+
+  useEffect(() => {
+    if (shouldAutoSubmit && !convo.submitted) {
+      const timer = setTimeout(() => actions.onSubmit(), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [shouldAutoSubmit, convo.submitted, actions]);
+
+  const showFeedback =
+    convo.chosen !== null &&
+    !convo.submitted &&
+    !shouldAutoSubmit;
 
   if (!hasContent) {
     return (
@@ -184,7 +207,7 @@ export default function ConversationView({
         </div>
 
         {/* Feedback */}
-        {anyChosen && (
+        {showFeedback && (
           <FeedbackBar
             characterName={shortName}
             marks={convo.marks}

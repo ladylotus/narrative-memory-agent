@@ -2,7 +2,21 @@
 
 import type { Novel } from "@/lib/types";
 
-export default function SettingsView({ novel }: { novel: Novel }) {
+const OPTIONS = [
+  { value: "always", label: "每次选择后", desc: "每次选了选项都会弹窗问原因" },
+  { value: "on-ooc", label: "仅高风险时", desc: "仅当选项有较高OOC风险时才询问" },
+  { value: "never", label: "不询问", desc: "自动记录偏好，不会弹窗" },
+] as const;
+
+export default function SettingsView({
+  novel,
+  feedbackPreference,
+  onChangeFeedbackPreference,
+}: {
+  novel: Novel;
+  feedbackPreference: "always" | "on-ooc" | "never";
+  onChangeFeedbackPreference: (v: "always" | "on-ooc" | "never") => void;
+}) {
   return (
     <div className="scroll">
       <div className="page">
@@ -48,6 +62,43 @@ export default function SettingsView({ novel }: { novel: Novel }) {
               <span className="sl-desc">只保留OOC风险色，其他全单色</span>
             </div>
           </div>
+
+          {/* Generation Bias — feedback preference */}
+          <div className="settings-divider" />
+
+          <div className="settings-row">
+            <div className="settings-label">
+              <span className="sl-name">🎯 偏好询问</span>
+              <span className="sl-desc">
+                选择后何时询问反馈，帮助AI学习你的判断标准
+              </span>
+            </div>
+          </div>
+
+          {OPTIONS.map((opt) => {
+            const sel = feedbackPreference === opt.value;
+            return (
+              <label
+                key={opt.value}
+                className={`toggle-row${sel ? " active" : ""}`}
+              >
+                <input
+                  type="radio"
+                  name="feedbackPreference"
+                  value={opt.value}
+                  checked={sel}
+                  onChange={() => onChangeFeedbackPreference(opt.value)}
+                />
+                <span className="toggle-knob">
+                  <span className="tk-dot" />
+                </span>
+                <div className="toggle-label">
+                  <span className="tl-name">{opt.label}</span>
+                  <span className="tl-desc">{opt.desc}</span>
+                </div>
+              </label>
+            );
+          })}
         </div>
       </div>
     </div>

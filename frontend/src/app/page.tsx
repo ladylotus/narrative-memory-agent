@@ -27,6 +27,7 @@ export default function Home() {
   const [options, setOptions] = useState<Option[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [sleepReport, setSleepReport] = useState<SleepReport | null>(null);
+  const [feedbackPreference, setFeedbackPreference] = useState<"always" | "on-ooc" | "never">("always");
   const [loading, setLoading] = useState(true);
 
   // Load character list on mount
@@ -237,6 +238,7 @@ export default function Home() {
             convo={convo}
             actions={actions}
             hasContent={!!scene}
+            feedbackPreference={feedbackPreference}
           />
         )}
         {view === "profile" && (
@@ -253,7 +255,11 @@ export default function Home() {
           <IngestionView onCharactersCreated={handleRefreshCharacters} />
         )}
         {view === "settings" && (
-          <SettingsView novel={NMA_NOVEL} />
+          <SettingsView
+            novel={NMA_NOVEL}
+            feedbackPreference={feedbackPreference}
+            onChangeFeedbackPreference={setFeedbackPreference}
+          />
         )}
       </main>
     </div>

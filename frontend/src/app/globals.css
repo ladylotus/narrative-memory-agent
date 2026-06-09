@@ -1019,6 +1019,73 @@ body {
   color: var(--ink-3);
 }
 
+.settings-divider {
+  height: 1px;
+  background: var(--line);
+  margin: 4px 0;
+}
+
+/* --- Feedback preference toggle --- */
+.toggle-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 0.15s;
+  margin: 0 -12px;
+}
+.toggle-row:hover {
+  background: var(--panel-hover);
+}
+.toggle-row.active {
+  background: var(--accent-soft);
+}
+.toggle-row input {
+  display: none;
+}
+.toggle-knob {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--ink-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: border-color 0.15s, background 0.15s;
+}
+.active .toggle-knob {
+  border-color: var(--accent);
+}
+.tk-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.active .tk-dot {
+  opacity: 1;
+}
+.toggle-label {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.tl-name {
+  font-size: 13px;
+  font-weight: 500;
+}
+.tl-desc {
+  font-size: 11px;
+  color: var(--ink-3);
+  line-height: 1.4;
+}
+
 /* --- Ingestion --- */
 .ingest-input {
   background: var(--panel);
