@@ -11,11 +11,9 @@ const API = "http://localhost:8000";
 // ── Backend raw types ──────────────────────────────────
 
 interface BOption {
-  title: string;
-  voice: string;
+  description: string;
   ooc_risk: number;
-  ooc_summary: string;
-  ooc_details: Record<string, number | string>; // includes T/B/D/C/P
+  ooc_details: Record<string, number | string>; // text, level, tag, type, T/B/D/C/P
 }
 
 interface BAskResp {
@@ -157,6 +155,10 @@ export async function fetchProfile(name: string): Promise<FrontendProfile | null
       y: 30 + (i % 2) * 40,
       tone: "warm",
     })),
+    // Extra fields consumed by UI (accessed via casts in components)
+    arc_stage: data.arc_stage,
+    motivation: data.motivation,
+    backstory: data.backstory,
   };
 }
 
@@ -200,6 +202,9 @@ function mapOption(opt: BOption, idx: number): Option {
   // Classify high risk: violation vs surprise
   const oocType = (opt.ooc_details?.type as string) || "normal";
 
+  // Use backend's risk tag (低风险/中风险/高风险) if available
+  const backendTag = opt.ooc_details?.tag as string | undefined;
+
   const labels: Record<string, string> = {
     low: "✅ 贴合",
     med: "⚠️ 偏移",
@@ -222,9 +227,9 @@ function mapOption(opt: BOption, idx: number): Option {
 
   return {
     idx: `Direction ${String(idx + 1).padStart(2, "0")}`,
-    title: opt.title,
-    voice: opt.voice,
-    tag: opt.ooc_summary || label,
+    title: opt.description,               // backend sends short title as "description"
+    voice: (opt.ooc_details?.text as string) || "",  // backend puts voice text in ooc_details.text
+    tag: backendTag || label,
     tagNew: false,
     risk: { level, label, pct, type: oocType as "violation" | "surprise" | "normal" },
     oocScores: scores,

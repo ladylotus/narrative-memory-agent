@@ -37,6 +37,7 @@ class EpisodicMemory:
                 embedding   TEXT,          -- JSON float array
                 related     TEXT,          -- JSON string array
                 zwaan_dims  TEXT,          -- JSON dict
+                emotion_tags TEXT,         -- JSON string array (Plutchik emotions)
                 created_at  TEXT DEFAULT (datetime('now'))
             );
             CREATE INDEX IF NOT EXISTS idx_events_protag
@@ -44,6 +45,12 @@ class EpisodicMemory:
             CREATE INDEX IF NOT EXISTS idx_events_chapter
                 ON events(chapter);
         """)
+        # Migration: add emotion_tags if missing (existing DB)
+        try:
+            self._conn.execute("ALTER TABLE events ADD COLUMN emotion_tags TEXT")
+            self._conn.commit()
+        except sqlite3.OperationalError:
+            pass  # column already exists
         self._conn.commit()
 
     def add_event(self, event: NarrativeEvent) -> None:
@@ -90,6 +97,24 @@ class EpisodicMemory:
         self._conn.execute(
             "UPDATE events SET importance = ? WHERE id = ?",
             (new_importance, event_id),
+        )
+        self._conn.commit()
+
+    def update_emotion_tags(
+        self, event_id: str, tags: list[str]
+    ) -> None:
+        """Store Plutchik emotion tags for an event."""
+        self._conn.execute(
+            "UPDATE events SET emotion_tags = ? WHERE id = ?",
+            (json.dumps(tags, ensure_ascii=False), event_id),
+        )
+        self._conn.commit()
+
+    def delete_event(self, event_id: str) -> None:
+        """Remove an event from the store."""
+        self._conn.execute(
+            "DELETE FROM events WHERE id = ?",
+            (event_id,),
         )
         self._conn.commit()
 

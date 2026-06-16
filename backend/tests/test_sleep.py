@@ -35,19 +35,19 @@ def _inject_test_events() -> None:
         INSERT OR REPLACE INTO events (id, chapter, position, protagonist, summary, importance, zwaan_dims) VALUES
             ('test_e1', 1, '1/4', 'Caelan Ashmark',
              'Caelan chose to withdraw from the negotiation rather than force a confrontation.',
-             0.4, '{"time":"evening","space":"hall","cause":"political pressure","intent":"avoid"}'),
+             0.4, '{"time":"evening","space":"hall","causality":"political pressure","intent":"avoid"}'),
             ('test_e2', 3, '2/4', 'Caelan Ashmark',
              'Caelan secretly undermined Corvan to secure a trade deal, breaking a private oath.',
-             0.8, '{"time":"night","space":"study","cause":"betrayal of trust","intent":"betray"}'),
+             0.8, '{"time":"night","space":"study","causality":"betrayal of trust","intent":"betray"}'),
             ('test_e3', 4, '3/4', 'Caelan Ashmark',
              'When challenged publicly, Caelan retreated instead of asserting his authority.',
-             0.6, '{"time":"afternoon","space":"great hall","cause":"public challenge","intent":"flee"}'),
+             0.6, '{"time":"afternoon","space":"great hall","causality":"public challenge","intent":"flee"}'),
             ('test_e4', 2, '1/2', 'Caelan Ashmark',
              'Caelan reviewed quarterly pack reports and approved the budget.',
-             0.2, '{"time":"morning","space":"office","cause":"routine","intent":"manage"}'),
+             0.2, '{"time":"morning","space":"office","causality":"routine","intent":"manage"}'),
             ('test_e5', 5, '1/1', 'Caelan Ashmark',
              'An elder pack member died unexpectedly. Caelan handled the arrangements in silence.',
-             0.5, '{"time":"dawn","space":"pack grounds","cause":"death","intent":"manage"}');
+             0.5, '{"time":"dawn","space":"pack grounds","causality":"death","intent":"manage"}');
     """)
     conn.commit()
     conn.close()

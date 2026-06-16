@@ -66,3 +66,107 @@ def test_profile_unknown() -> None:
 def test_sleep_stub() -> None:
     resp = client.post("/sleep/Caelan Ashmark")
     assert resp.status_code == 200
+
+def test_feedback_missing_scores() -> None:
+    """Missing score dimensions should return 400."""
+    resp = client.post(
+        "/feedback/",
+        json={
+            "character": "Caelan Ashmark",
+            "option_label": "Direction 01",
+            "scores": {"T": 0.8, "B": 0.7},  # missing D/C/P
+            "marks": [],
+        },
+    )
+    assert resp.status_code == 400
+    data = resp.json()
+    assert "Missing score dimension" in data["detail"]
+
+
+def test_feedback_unknown_character() -> None:
+    """Unknown character should return 404."""
+    resp = client.post(
+        "/feedback/",
+        json={
+            "character": "Nobody",
+            "option_label": "A",
+            "scores": {"T": 0.5, "B": 0.5, "D": 0.5, "C": 0.5, "P": 0.5},
+            "marks": [],
+        },
+    )
+    assert resp.status_code == 404
+
+
+def test_feedback_full_flow() -> None:
+    """Character-driven mark updates preferred_profile via EMA."""
+    # First, fetch current profile to get baseline
+    resp = client.get("/profile/Caelan Ashmark")
+    assert resp.status_code == 200
+    before = resp.json()
+
+    # Submit feedback: character-driven → EMA α=0.3
+    resp = client.post(
+        "/feedback/",
+        json={
+            "character": "Caelan Ashmark",
+            "option_label": "Direction 01",
+            "scores": {"T": 0.85, "B": 0.80, "D": 0.15, "C": 0.90, "P": 0.10},
+            "marks": ["这就是他会做的事"],
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert data["updated"] is True
+    assert data["preferred_profile"] is not None
+    assert len(data["preferred_profile"]) == 5
+
+
+def test_feedback_plot_driven_no_update() -> None:
+    """Plot-driven mark should NOT update preferred_profile."""
+    resp = client.post(
+        "/feedback/",
+        json={
+            "character": "Caelan Ashmark",
+            "option_label": "Direction 02",
+            "scores": {"T": 0.7, "B": 0.6, "D": 0.3, "C": 0.8, "P": 0.2},
+            "marks": ["情节需要这个走向"],
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    # Plot-driven marks don't trigger EMA update
+    assert data["updated"] is False
+
+
+def test_feedback_experimental_no_update() -> None:
+    """Experiment mark should NOT update preferred_profile."""
+    resp = client.post(
+        "/feedback/",
+        json={
+            "character": "Caelan Ashmark",
+            "option_label": "Direction 03",
+            "scores": {"T": 0.5, "B": 0.5, "D": 0.6, "C": 0.6, "P": 0.5},
+            "marks": ["想看看这个可能性"],
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["updated"] is False
+
+
+def test_feedback_default_mark_slow_ema() -> None:
+    """Default/'说不上来' mark uses slow EMA α=0.1 and still updates."""
+    resp = client.post(
+        "/feedback/",
+        json={
+            "character": "Caelan Ashmark",
+            "option_label": "Direction 04",
+            "scores": {"T": 0.2, "B": 0.1, "D": 0.9, "C": 0.3, "P": 0.8},
+            "marks": ["说不上来，就是感觉"],
+        },
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["updated"] is True
+    assert data["preferred_profile"] is not None

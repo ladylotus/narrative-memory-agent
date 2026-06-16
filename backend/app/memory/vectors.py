@@ -1,4 +1,5 @@
 """Vector store wrapper — ChromaDB for embedding-based retrieval."""
+# ruff: noqa: ERA001
 
 from __future__ import annotations
 
@@ -23,12 +24,33 @@ class VectorStore:
         """Get or create a named collection."""
         return self._client.get_or_create_collection(name=name)
 
-    def add(self, collection: str, id: str, embedding: list[float], metadata: dict[str, Any]) -> None:
+    def add(
+        self,
+        collection: str,
+        id: str,
+        embedding: list[float],
+        metadata: dict[str, Any],
+    ) -> None:
         self._collection(collection).add(
             embeddings=[embedding],
             ids=[id],
             metadatas=[metadata],
         )
+
+    def delete(self, collection: str, id: str) -> None:
+        """Delete a single item by ID."""
+        self._collection(collection).delete(ids=[id])
+
+    def get_all_by_metadata(
+        self,
+        collection: str,
+        where: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Retrieve all items matching a metadata filter.
+
+        Returns dict with keys: ids, embeddings, metadatas, documents.
+        """
+        return self._collection(collection).get(where=where)
 
     def search(
         self,
@@ -61,7 +83,11 @@ class VectorStore:
         for i in range(len(results["ids"][0])):
             output.append({
                 "id": results["ids"][0][i],
-                "score": results["distances"][0][i] if results.get("distances") else None,
-                "metadata": results["metadatas"][0][i] if results.get("metadatas") else {},
+                "score": results["distances"][0][i]
+                if results.get("distances")
+                else None,
+                "metadata": results["metadatas"][0][i]
+                if results.get("metadatas")
+                else {},
             })
         return output
