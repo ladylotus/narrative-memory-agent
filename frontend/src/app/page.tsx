@@ -27,8 +27,9 @@ export default function Home() {
   const [options, setOptions] = useState<Option[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [sleepReport, setSleepReport] = useState<SleepReport | null>(null);
-  const [feedbackPreference, setFeedbackPreference] = useState<"always" | "on-ooc" | "never">("always");
+  const [feedbackPreference, setFeedbackPreference] = useState("always");
   const [loading, setLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   // Load character list on mount
   useEffect(() => {
@@ -38,6 +39,9 @@ export default function Home() {
         setActiveChar(chars[0].id);
       }
       setLoading(false);
+    }).catch(() => {
+      setLoading(false);
+      setErrorMsg("无法连接后端服务——请确认 FastAPI 是否在 localhost:8000 运行");
     });
   }, []);
 
@@ -49,6 +53,11 @@ export default function Home() {
 
     fetchProfile(activeChar).then((p) => {
       setProfile(p);
+      if (!p) {
+        setErrorMsg(`无法加载角色「${activeChar}」的档案——后端可能尚未摄入该角色`);
+        setTimeout(() => setErrorMsg(null), 5000);
+        return;
+      }
       // Build an initial scene from the character's backstory
       if (p) {
         setScene({
@@ -107,8 +116,10 @@ export default function Home() {
             { text, options: result.options },
           ],
         });
-      } catch {
+      } catch (e) {
         updateConvo({ thinking: false });
+        setErrorMsg(`对话生成失败：${e instanceof Error ? e.message : '服务器无响应'}`);
+        setTimeout(() => setErrorMsg(null), 5000);
       }
     },
     [activeChar, scene, convoMap, updateConvo]
@@ -152,6 +163,9 @@ export default function Home() {
     if (report) {
       setSleepReport(report);
       setView("sleeplog");
+    } else {
+      setErrorMsg("睡眠巩固失败——后端可能没有该角色的记忆数据");
+      setTimeout(() => setErrorMsg(null), 5000);
     }
   }, [activeChar]);
 
@@ -198,6 +212,18 @@ export default function Home() {
       />
 
       <main className="main-content">
+        {/* ── Error toast ── */}
+        {errorMsg && (
+          <div style={{
+            position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)",
+            background: "#c0392b", color: "#fff", padding: "10px 20px",
+            borderRadius: 8, fontSize: 13, zIndex: 9999,
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+            maxWidth: "90%", textAlign: "center",
+          }}>
+            {errorMsg}
+          </div>
+        )}
         {/* Nav tabs */}
         <div style={{
           display: "flex", gap: 4, padding: "0 40px", paddingTop: 20,
