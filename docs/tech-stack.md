@@ -10,6 +10,7 @@
 - **Server:** Uvicorn
 - **ORM / Storage:** Raw SQLite via sqlite3 stdlib
 - **Vector Store:** ChromaDB (PersistentClient)
+- **Decay Service:** Time-based memory decay (`decay.py`) — recall_score formula, auto-archiving
 
 ## AI / LLM
 - **Generation Model:** Qwen 3.6-plus (dashscope-intl)
@@ -18,7 +19,7 @@
 
 ## Testing
 - **Framework:** pytest 9.0 + pytest-asyncio
-- **Coverage:** 80 unit tests (validation, generation, bias, bias_prompt, API, sleep)
+- **Coverage:** 93 unit tests (bias, decay, validation, bias_prompt, API, sleep)
 
 ## Deployment
 - **Containerization:** Docker (multi-stage builds)

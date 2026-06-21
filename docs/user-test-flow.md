@@ -38,6 +38,7 @@
 - [ ] 出现 4 个选项，每张卡都有 risk 等级（green/orange/red）
 - [ ] risk 标签同时显示类型（fitting / violation / surprise）
 - [ ] 选项有 title + voice 文案，风格像 Elizabeth 会说的话
+- [ ] 选项明显参考了剧情事件（如 Darcy 的求婚、舞会上的侮辱）—— 说明情景记忆已注入
 
 **核心亮点口播：** *"Every response is validated through our Dual Circuit — generation plus OOC scoring on five factors: trait consistency, behavior patterns, semantic distance, self-consistency, and surprise value."*
 
@@ -90,6 +91,7 @@
 - [ ] NREM 阶段列出提取的事实
 - [ ] REM 阶段列出抽象的 trait 变化
 - [ ] Self-Audit 有置信度评述
+- [ ] 如果已有大量事件，报告中会出现 📦 归档行（demo 数据量小则不会触发）
 - [ ] 无后端错误（检查浏览器 Console 无红色报错）
 
 **口播：** *"Inspired by human memory consolidation — NREM extracts facts, REM abstracts patterns, and the system audits its own confidence."*
@@ -132,7 +134,7 @@
 | 5 | 跑 Sleep | 三段报告可展开、无后端错误 | ☐ |
 | 6 | 切角色回看 | session resumption 横幅出现 | ☐ |
 
-**6 项全绿 → 核心链路完整打通。** 后端、前端、LLM 通信、Memory 读写、GenBias 回路的边界测试虽未手动执行，但已在开发环境中 80/80 通过，可以安心准备提交材料。
+**6 项全绿 → 核心链路完整打通。** 后端、前端、LLM 通信、Memory 读写（含衰减归档）、GenBias 回路的边界测试已在开发环境中 93/93 通过，可以安心准备提交材料。
 
 ---
 

@@ -21,6 +21,8 @@ Unlike generic chatbots or writing assistants, NMA treats each character as a un
 | **Ask a Character** | Query any character in their authentic voice. NMA generates 2-5 distinct development paths |
 | **OOC Validation** | Every response is scored on 5 factors: Trait consistency, Behavior patterns, Semantic distance, Self-consistency, and Surprise. Violations and surprises are flagged with a risk level |
 | **GenBias Learning** | When you mark a response as "what they'd do", NMA learns your preference via EMA (Exponential Moving Average) and biases future generations accordingly |
+| **Memory Decay** | Events naturally fade over time. Low-importance memories are automatically archived during Sleep Consolidation, keeping the active memory set relevant and compact |
+| **Episodic Memory Injection** | Every question retrieves the character's relevant memories (filtered by recall strength) and injects them into the generation prompt — characters remember what happened to them |
 | **Sleep Consolidation** | An offline cycle that consolidates episodic events into abstract traits, detects contradictions, prunes noise, and produces a self-audit report — inspired by human memory consolidation |
 | **Cross-Session Memory** | NMA remembers previous conversations with each character across sessions. Switch characters and come back — they remember what you talked about |
 
@@ -157,8 +159,8 @@ narrative-memory-agent/
 │   │   ├── api/           # FastAPI route handlers
 │   │   ├── memory/        # 3-layer memory (working/episodic/vectors)
 │   │   ├── models/        # Data models (Pydantic + dataclasses)
-│   │   └── services/      # Core services (generation/validation/bias/sleep)
-│   └── tests/             # 80 unit tests
+│   ├── services/      # Core services (generation/validation/bias/decay/sleep)
+│   └── tests/             # 93 unit tests
 ├── frontend/
 │   └── src/
 │       ├── app/           # Next.js pages
