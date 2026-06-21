@@ -2,12 +2,15 @@
 
 Pride and Prejudice (Jane Austen, 1813) for the Qwen Cloud Global AI Hackathon.
 Familiar to a global audience; rich character arcs ideal for OOC detection
-and narrative memory demos.
+and narrative memory demos. Also seeds demo episodic events so the memory
+system has data to retrieve on first use.
 """
 
 from __future__ import annotations
 
 from app.database import get_character, upsert_character
+from app.memory.episodic import EpisodicMemory
+from app.models.event import NarrativeEvent
 
 
 ELIZABETH_BENNET = {
@@ -125,12 +128,272 @@ FITZWILLIAM_DARCY = {
 }
 
 
+# ── Seed events ──────────────────────────────────────────
+
+_EVENTS_ELIZABETH = [
+    {
+        "id": "eliza_meryton_ball",
+        "chapter": 1,
+        "summary": (
+            "At the Meryton assembly, Elizabeth overheard Mr. Darcy tell Bingley "
+            "that she is 'tolerable, but not handsome enough to tempt me.' "
+            "She was standing within hearing distance. She told her friends the story "
+            "with great spirit — but it stung."
+        ),
+        "importance": 0.75,
+        "zwaan_dims": {
+            "time": "evening",
+            "space": "Meryton assembly rooms",
+            "protagonist": "Elizabeth",
+            "causality": "social introduction",
+            "intent": "observe",
+        },
+    },
+    {
+        "id": "eliza_netherfield_jane",
+        "chapter": 2,
+        "summary": (
+            "Jane fell ill while dining at Netherfield. Elizabeth walked three miles "
+            "through muddy fields to care for her, arriving with her petticoats six inches deep in mud. "
+            "Darcy watched her with an expression she could not read — part disapproval, part something else."
+        ),
+        "importance": 0.70,
+        "zwaan_dims": {
+            "time": "morning",
+            "space": "Netherfield Park",
+            "protagonist": "Elizabeth",
+            "causality": "sibling concern",
+            "intent": "caregiving",
+        },
+    },
+    {
+        "id": "eliza_collins_proposal",
+        "chapter": 3,
+        "summary": (
+            "Mr. Collins proposed to Elizabeth. She refused him clearly and firmly, "
+            "though her mother is furious and insists she accept. "
+            "Elizabeth stood her ground — she will not marry a man she cannot respect, "
+            "even to save her family from financial ruin."
+        ),
+        "importance": 0.80,
+        "zwaan_dims": {
+            "time": "afternoon",
+            "space": "Longbourn",
+            "protagonist": "Elizabeth",
+            "causality": "social obligation",
+            "intent": "refuse",
+        },
+    },
+    {
+        "id": "eliza_wickham_story",
+        "chapter": 3,
+        "summary": (
+            "At a party in Meryton, Mr. Wickham told Elizabeth a devastating story: "
+            "Darcy's father had promised him a valuable living, but Darcy denied it out of jealousy. "
+            "Elizabeth believed Wickham entirely. This confirmed every bad opinion she had formed of Darcy."
+        ),
+        "importance": 0.85,
+        "zwaan_dims": {
+            "time": "evening",
+            "space": "Meryton",
+            "protagonist": "Elizabeth",
+            "causality": "conversation",
+            "intent": "trust",
+        },
+    },
+    {
+        "id": "eliza_hunsford_proposal",
+        "chapter": 5,
+        "summary": (
+            "Darcy proposed to Elizabeth at Hunsford Parsonage. His proposal was arrogant — "
+            "he spoke of his struggle against his inferior connections, his certainty of her acceptance. "
+            "She refused him with devastating clarity: his pride, his cruelty to Wickham, "
+            "his interference with Jane and Bingley. She told him he was the last man in the world "
+            "she could ever be prevailed upon to marry. He left in shock."
+        ),
+        "importance": 0.95,
+        "zwaan_dims": {
+            "time": "morning",
+            "space": "Hunsford Parsonage",
+            "protagonist": "Elizabeth",
+            "causality": "proposal",
+            "intent": "refuse",
+        },
+    },
+    {
+        "id": "eliza_darcy_letter",
+        "chapter": 5,
+        "summary": (
+            "The morning after the proposal, Darcy handed Elizabeth a letter. "
+            "In it, he admitted separating Bingley from Jane — but defended it based on "
+            "what he believed was Jane's indifference. He also revealed the truth about Wickham: "
+            "Wickham attempted to elope with Darcy's fifteen-year-old sister Georgiana for her fortune. "
+            "Elizabeth read the letter multiple times, her opinion of Darcy beginning to shift."
+        ),
+        "importance": 0.90,
+        "zwaan_dims": {
+            "time": "morning",
+            "space": "Hunsford",
+            "protagonist": "Elizabeth",
+            "causality": "letter",
+            "intent": "reflect",
+        },
+    },
+]
+
+_EVENTS_DARCY = [
+    {
+        "id": "darcy_meryton_ball",
+        "chapter": 1,
+        "summary": (
+            "At the Meryton assembly, Darcy danced only with Bingley's sisters and refused "
+            "to be introduced to anyone new. When Bingley urged him to dance with Elizabeth Bennet, "
+            "Darcy replied that she was 'tolerable, but not handsome enough to tempt me.' "
+            "Miss Bennet overheard him. He did not think much of it at the time."
+        ),
+        "importance": 0.75,
+        "zwaan_dims": {
+            "time": "evening",
+            "space": "Meryton assembly rooms",
+            "protagonist": "Darcy",
+            "causality": "social introduction",
+            "intent": "reject",
+        },
+    },
+    {
+        "id": "darcy_netherfield_observation",
+        "chapter": 2,
+        "summary": (
+            "While Elizabeth stayed at Netherfield nursing Jane, Darcy found himself "
+            "watching her constantly. Her fine eyes, her easy laugh, her utter indifference to his opinion — "
+            "she was unlike any woman he had met. He began to be attracted against his better judgment."
+        ),
+        "importance": 0.70,
+        "zwaan_dims": {
+            "time": "evening",
+            "space": "Netherfield Park",
+            "protagonist": "Darcy",
+            "causality": "proximity",
+            "intent": "observe",
+        },
+    },
+    {
+        "id": "darcy_separates_bingley",
+        "chapter": 3,
+        "summary": (
+            "Darcy persuaded Bingley that Jane Bennet was indifferent to him, "
+            "convincing him to leave Netherfield for London. Darcy genuinely believed "
+            "Jane did not love Bingley — her composure was too calm for a woman in love. "
+            "He thought he was protecting his friend from an unsuitable attachment."
+        ),
+        "importance": 0.75,
+        "zwaan_dims": {
+            "time": "autumn",
+            "space": "Netherfield",
+            "protagonist": "Darcy",
+            "causality": "friendship",
+            "intent": "protect",
+        },
+    },
+    {
+        "id": "darcy_hunsford_proposal",
+        "chapter": 5,
+        "summary": (
+            "Darcy proposed to Elizabeth at Hunsford. He told her of his love despite "
+            "her inferior connections — expecting acceptance. She refused him furiously: "
+            "accusing him of pride, of cruelty to Wickham, of destroying Jane's happiness. "
+            "She said he was 'the last man in the world she could ever be prevailed upon to marry.' "
+            "He left devastated — but her accusations forced him to see himself clearly for the first time."
+        ),
+        "importance": 0.95,
+        "zwaan_dims": {
+            "time": "morning",
+            "space": "Hunsford Parsonage",
+            "protagonist": "Darcy",
+            "causality": "proposal",
+            "intent": "confess",
+        },
+    },
+    {
+        "id": "darcy_writes_letter",
+        "chapter": 5,
+        "summary": (
+            "After the rejection, Darcy wrote Elizabeth a long letter in answer to her accusations. "
+            "He admitted separating Bingley from Jane, detailing his honest belief in Jane's indifference. "
+            "He revealed Wickham's true character — the attempted elopement with Georgiana. "
+            "Writing the letter forced him to articulate things to himself that he had never admitted."
+        ),
+        "importance": 0.85,
+        "zwaan_dims": {
+            "time": "morning",
+            "space": "Hunsford",
+            "protagonist": "Darcy",
+            "causality": "rejection",
+            "intent": "explain",
+        },
+    },
+    {
+        "id": "darcy_pemberley_meeting",
+        "chapter": 6,
+        "summary": (
+            "Weeks after Hunsford, Darcy encountered Elizabeth unexpectedly at his own estate, Pemberley. "
+            "He was mortified at his appearance — just returned from fishing — but found "
+            "her manner towards him surprisingly softened. He invited her and her aunt and uncle to dine, "
+            "determined to show her he had changed."
+        ),
+        "importance": 0.80,
+        "zwaan_dims": {
+            "time": "afternoon",
+            "space": "Pemberley",
+            "protagonist": "Darcy",
+            "causality": "chance encounter",
+            "intent": "reconnect",
+        },
+    },
+]
+
+
+def _make_event(char_name: str, data: dict) -> NarrativeEvent:
+    """Build a NarrativeEvent from a dict for the given character."""
+    return NarrativeEvent(
+        id=data["id"],
+        chapter=data["chapter"],
+        position=f"{data['chapter']}.0",
+        protagonist=char_name,
+        summary=data["summary"],
+        importance=data["importance"],
+        related_entities=[zwaan.get("space", "")] if (zwaan := data.get("zwaan_dims", {})) else [],
+        zwaan_dims=data.get("zwaan_dims", {}),
+        embedding=None,
+    )
+
+
 def seed_demo_character() -> None:
-    """Seed Elizabeth and Darcy if not already in the database."""
+    """Seed Elizabeth and Darcy (if not already in DB) + demo events."""
+    episodic = EpisodicMemory()
+    seeded_any = False
+
     for char in [ELIZABETH_BENNET, FITZWILLIAM_DARCY]:
         existing = get_character(char["name"])
         if existing is not None:
             print(f"  ✓ {char['name']} already exists, skipping")
-            continue
-        upsert_character(char)
-        print(f"  ✓ Seeded {char['name']}")
+        else:
+            upsert_character(char)
+            print(f"  ✓ Seeded {char['name']}")
+            seeded_any = True
+
+    # Seed demo events (idempotent — skips if already present)
+    for char_name, event_list in [
+        ("Elizabeth Bennet", _EVENTS_ELIZABETH),
+        ("Fitzwilliam Darcy", _EVENTS_DARCY),
+    ]:
+        for data in event_list:
+            existing = episodic.get_event(data["id"])
+            if existing is not None:
+                continue
+            ev = _make_event(char_name, data)
+            episodic.add_event(ev)
+            print(f"  ✓ Seeded event '{data['id']}' (for {char_name})")
+
+    if not seeded_any:
+        print("  ✓ All demo data already present")
