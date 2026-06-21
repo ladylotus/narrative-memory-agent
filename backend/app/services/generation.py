@@ -45,8 +45,9 @@ class GenerationService:
         self,
         character: str,
         question: str,
-        num_options: int = 3,
+        num_options: int = 4,
         context_history: list[Turn] | None = None,
+        episodic_context: dict[str, list[dict[str, Any]]] | None = None,
     ) -> list[dict[str, Any]]:
         profile = get_character(character)
         if profile is None:
@@ -97,6 +98,26 @@ class GenerationService:
                     f"---\n"
                     f"{bias_text}\n"
                     f"---\n"
+                )
+
+        # ── Episodic memory context ─────────────────────────────
+        if episodic_context:
+            active_events = episodic_context.get("active", [])
+            fading_events = episodic_context.get("fading", [])
+            memory_parts: list[str] = []
+            for ev in active_events:
+                summary = ev.get("summary", "").strip()
+                if summary:
+                    memory_parts.append(f"- {summary}")
+            for ev in fading_events:
+                summary = ev.get("summary", "").strip()
+                if summary:
+                    memory_parts.append(f"- (vaguely) {summary}")
+            if memory_parts:
+                system_prompt += (
+                    f"\n"
+                    f"Things you remember:\n"
+                    f"{chr(10).join(memory_parts)}\n"
                 )
 
         # ── User prompt ─────────────────────────────────────────

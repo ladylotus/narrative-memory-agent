@@ -30,6 +30,7 @@ from app.config import (
 from app.database import get_character, upsert_character
 from app.memory.episodic import EpisodicMemory
 from app.memory.vectors import VectorStore
+from app.services.decay import recall_score, classify
 
 logger = logging.getLogger(__name__)
 
@@ -94,6 +95,7 @@ class ConsolidationReport:
             "events_analyzed": 0,
             "conflicts_detected": [],
             "importance_adjustments": [],
+            "events_archived": 0,
         }
         self.phase2: dict[str, Any] = {
             "patterns_extracted": [],
@@ -149,6 +151,9 @@ class SleepService:
         event_impacts = self._phase1_fact_consolidation(events, char_data, report)
         for event_id, new_imp in event_impacts:
             self._episodic.update_importance(event_id, new_imp)
+
+        # ── Phase 1.5 — decay archive ──
+        archived = self._phase1_decay_archive(events, char_data, report)
 
         # ── Phase 2 — REM (hybrid) ──
         await self._phase2_rem(events, char_data, report)
@@ -256,6 +261,54 @@ class SleepService:
         return current
 
     # ══════════════════════════════════════════════════════
+    #  Phase 1.5 — 衰减归档 (Decay Archive)
+    # ══════════════════════════════════════════════════════
+
+    def _phase1_decay_archive(
+        self,
+        events: list[dict[str, Any]],
+        char_data: dict[str, Any],
+        report: ConsolidationReport,
+    ) -> int:
+        """Archive events whose recall_score has fallen below the archive threshold.
+
+        Events are moved from the active events table to the event_archive table,
+        and their vector embeddings are removed from ChromaDB.
+        """
+        char_name = char_data.get("name", "")
+        current_chapter = self._episodic.get_max_chapter(char_name)
+        archived_count = 0
+
+        for ev in events:
+            chapter = ev.get("chapter", 1) or 1
+            imp = ev.get("importance", 0.5) or 0.5
+            score = recall_score(imp, current_chapter - chapter)
+            if classify(score) != "archived":
+                continue
+
+            ev_id = ev.get("id", "")
+            if not ev_id:
+                continue
+
+            # Move to archive
+            summary = ev.get("summary", "")
+            truncated = summary[:100] if len(summary) > 100 else summary
+            success = self._episodic.archive_event(ev_id, truncated)
+            if not success:
+                continue
+
+            # Also remove from ChromaDB
+            try:
+                self._vectors.delete("events", ev_id)
+            except Exception:
+                pass  # Vector may not exist — not an error
+
+            archived_count += 1
+
+        report.phase1["events_archived"] = archived_count
+        return archived_count
+
+    # ══════════════════════════════════════════════════════
     #  Phase 2 — 抽象整合  (REM)  —  Hybrid
     # ══════════════════════════════════════════════════════
 
@@ -271,6 +324,17 @@ class SleepService:
 
         # ── ① LLM pattern extraction ──
         sample = sorted_events[:_PATTERN_SAMPLE_SIZE]
+
+        # Also include archived events for long-term pattern context
+        archived_events = self._episodic.get_archive(
+            character=char_data["name"], limit=15
+        )
+        if archived_events:
+            # Mark archived events so the LLM knows they're historical
+            for ae in archived_events:
+                ae["summary"] = "[Archived] " + ae.get("summary", "")
+            sample = sample + archived_events
+
         patterns = await self._extract_patterns_llm(char_data, sample)
         if patterns:
             char_data["behavior_patterns"] = patterns
@@ -546,6 +610,8 @@ class SleepService:
             parts.append("✅ 未发现行为冲突")
         if p1["importance_adjustments"]:
             parts.append(f"🔺 调整了 {len(p1['importance_adjustments'])} 个关键事件的权重")
+        if p1.get("events_archived", 0):
+            parts.append(f"📦 归档了 {p1['events_archived']} 个事件（过时记忆）")
         if p2["patterns_extracted"]:
             parts.append(f"🧩 提取了 {len(p2['patterns_extracted'])} 个行为模式")
         if p2["events_pruned"]:

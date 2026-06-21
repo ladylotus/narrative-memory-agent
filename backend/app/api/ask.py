@@ -6,7 +6,9 @@ from fastapi import APIRouter, HTTPException
 
 from app.database import get_character
 from app.models import AskRequest, AskResponse, Option
+from app.memory.episodic import EpisodicMemory
 from app.memory.working import WorkingMemory
+from app.services.decay import select_context
 from app.services.generation import GenerationService
 from app.services.session_resumption import (
     restore_working_memory,
@@ -17,6 +19,7 @@ from app.services.validation import ValidationService
 router = APIRouter()
 gen = GenerationService()
 val = ValidationService()
+episodic = EpisodicMemory()
 
 # Per-character working memory buffers
 _sessions: dict[str, WorkingMemory] = {}
@@ -77,12 +80,24 @@ async def ask_character(body: AskRequest):
     try:
         wm = _get_wm(body.character)
 
-        # Circuit A: generate options with working memory context
+        # ── Episodic context: inject relevant events from memory ──
+        char_events = episodic.get_events(
+            protagonist=body.character, limit=100
+        )
+        current_chapter = episodic.get_max_chapter(body.character)
+        recall_ctx = select_context(
+            events=char_events,
+            current_chapter=current_chapter,
+        )
+        recalled_ids = recall_ctx.get("all_ids", [])
+
+        # Circuit A: generate options with working memory + episodic context
         raw_options = await gen.generate_options(
             character=body.character,
             question=body.question,
             num_options=body.num_options,
             context_history=wm.get_context(),
+            episodic_context=recall_ctx,
         )
 
         # Circuit B: validate each option
@@ -126,6 +141,9 @@ async def ask_character(body: AskRequest):
 
         # Record user question in working memory
         wm.add(role="user", content=body.question)
+
+        # Record episodic access count for recalled events
+        episodic.record_access(recalled_ids)
 
         # Auto-checkpoint: persist working memory after each interaction
         # so the session survives crashes and server restarts
