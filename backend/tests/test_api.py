@@ -25,7 +25,7 @@ def test_ask_real() -> None:
     """/ask should now return real options for seeded character."""
     resp = client.post(
         "/ask/",
-        json={"character": "Caelan Ashmark", "question": "What keeps you up at night?", "num_options": 3},
+        json={"character": "Elizabeth Bennet", "question": "What keeps you up at night?", "num_options": 3},
     )
     assert resp.status_code == 200
     data = resp.json()
@@ -47,11 +47,11 @@ def test_ask_unknown_character() -> None:
 
 def test_profile_real() -> None:
     """/profile should now return real data from database."""
-    resp = client.get("/profile/Caelan Ashmark")
+    resp = client.get("/profile/Elizabeth Bennet")
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "ok"
-    assert data["character"] == "Caelan Ashmark"
+    assert data["character"] == "Elizabeth Bennet"
     assert len(data["traits"]) > 0
     # Should have core traits
     core_traits = [t for t in data["traits"] if t.get("category") == "core"]
@@ -64,7 +64,7 @@ def test_profile_unknown() -> None:
 
 
 def test_sleep_stub() -> None:
-    resp = client.post("/sleep/Caelan Ashmark")
+    resp = client.post("/sleep/Elizabeth Bennet")
     assert resp.status_code == 200
 
 def test_feedback_missing_scores() -> None:
@@ -72,7 +72,7 @@ def test_feedback_missing_scores() -> None:
     resp = client.post(
         "/feedback/",
         json={
-            "character": "Caelan Ashmark",
+            "character": "Elizabeth Bennet",
             "option_label": "Direction 01",
             "scores": {"T": 0.8, "B": 0.7},  # missing D/C/P
             "marks": [],
@@ -100,7 +100,7 @@ def test_feedback_unknown_character() -> None:
 def test_feedback_full_flow() -> None:
     """Character-driven mark updates preferred_profile via EMA."""
     # First, fetch current profile to get baseline
-    resp = client.get("/profile/Caelan Ashmark")
+    resp = client.get("/profile/Elizabeth Bennet")
     assert resp.status_code == 200
     before = resp.json()
 
@@ -108,10 +108,10 @@ def test_feedback_full_flow() -> None:
     resp = client.post(
         "/feedback/",
         json={
-            "character": "Caelan Ashmark",
+            "character": "Elizabeth Bennet",
             "option_label": "Direction 01",
             "scores": {"T": 0.85, "B": 0.80, "D": 0.15, "C": 0.90, "P": 0.10},
-            "marks": ["这就是他会做的事"],
+            "marks": ["role-driven"],
         },
     )
     assert resp.status_code == 200
@@ -127,10 +127,10 @@ def test_feedback_plot_driven_no_update() -> None:
     resp = client.post(
         "/feedback/",
         json={
-            "character": "Caelan Ashmark",
+            "character": "Elizabeth Bennet",
             "option_label": "Direction 02",
             "scores": {"T": 0.7, "B": 0.6, "D": 0.3, "C": 0.8, "P": 0.2},
-            "marks": ["情节需要这个走向"],
+            "marks": ["plot-driven"],
         },
     )
     assert resp.status_code == 200
@@ -144,10 +144,10 @@ def test_feedback_experimental_no_update() -> None:
     resp = client.post(
         "/feedback/",
         json={
-            "character": "Caelan Ashmark",
+            "character": "Elizabeth Bennet",
             "option_label": "Direction 03",
             "scores": {"T": 0.5, "B": 0.5, "D": 0.6, "C": 0.6, "P": 0.5},
-            "marks": ["想看看这个可能性"],
+            "marks": ["experimental"],
         },
     )
     assert resp.status_code == 200
@@ -156,14 +156,14 @@ def test_feedback_experimental_no_update() -> None:
 
 
 def test_feedback_default_mark_slow_ema() -> None:
-    """Default/'说不上来' mark uses slow EMA α=0.1 and still updates."""
+    """Default/'gut-feeling' mark uses slow EMA a=0.1 and still updates."""
     resp = client.post(
         "/feedback/",
         json={
-            "character": "Caelan Ashmark",
+            "character": "Elizabeth Bennet",
             "option_label": "Direction 04",
             "scores": {"T": 0.2, "B": 0.1, "D": 0.9, "C": 0.3, "P": 0.8},
-            "marks": ["说不上来，就是感觉"],
+            "marks": ["gut-feeling"],
         },
     )
     assert resp.status_code == 200

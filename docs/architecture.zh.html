@@ -51,7 +51,7 @@
     </div>
 
     <div class="diagram-container">
-      <svg viewBox="0 0 1050 820">
+      <svg viewBox="0 0 1050 920">
         <defs>
           <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
@@ -64,6 +64,9 @@
           </marker>
           <marker id="arrow-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
             <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
+          </marker>
+          <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
           </marker>
           <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
             <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
@@ -83,14 +86,14 @@
         </text>
 
         <!-- FastAPI 后端 -->
-        <rect x="30" y="210" width="600" height="440" rx="10"
+        <rect x="30" y="210" width="600" height="490" rx="10"
               fill="rgba(6, 78, 59, 0.06)" stroke="#34d399" stroke-width="1" stroke-dasharray="8,4"/>
         <text x="40" y="228" fill="#34d399" font-size="10" font-weight="600">
           FastAPI 后端（Python）
         </text>
 
         <!-- 存储层 -->
-        <rect x="660" y="210" width="360" height="440" rx="10"
+        <rect x="660" y="210" width="360" height="580" rx="10"
               fill="rgba(76, 29, 149, 0.06)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="8,4"/>
         <text x="670" y="228" fill="#a78bfa" font-size="10" font-weight="600">
           存储层
@@ -186,38 +189,49 @@
           提问 → 选项 + OOC 评分
         </text>
 
+        <!-- /feedback -->
+        <rect x="60" y="366" width="160" height="36" rx="6"
+              fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="140" y="385" fill="white" font-size="12" font-weight="600" text-anchor="middle">
+          POST /feedback
+        </text>
+        <text x="140" y="397" fill="#fbbf24" font-size="8" text-anchor="middle">
+          用户标记 → EMA学习
+        </text>
+
         <!-- /profile -->
-        <rect x="60" y="376" width="160" height="42" rx="6"
+        <rect x="60" y="418" width="160" height="42" rx="6"
               fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="140" y="396" fill="white" font-size="12" font-weight="600" text-anchor="middle">
+        <text x="140" y="438" fill="white" font-size="12" font-weight="600" text-anchor="middle">
           GET /profile/{name}
         </text>
-        <text x="140" y="410" fill="#94a3b8" font-size="8" text-anchor="middle">
+        <text x="140" y="452" fill="#94a3b8" font-size="8" text-anchor="middle">
           角色认知档案
         </text>
 
         <!-- /sleep -->
-        <rect x="60" y="434" width="160" height="42" rx="6"
+        <rect x="60" y="476" width="160" height="42" rx="6"
               fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="140" y="454" fill="white" font-size="12" font-weight="600" text-anchor="middle">
+        <text x="140" y="496" fill="white" font-size="12" font-weight="600" text-anchor="middle">
           POST /sleep/{name}
         </text>
-        <text x="140" y="468" fill="#94a3b8" font-size="8" text-anchor="middle">
+        <text x="140" y="510" fill="#94a3b8" font-size="8" text-anchor="middle">
           离线记忆巩固
         </text>
 
         <!-- /health -->
-        <rect x="60" y="492" width="160" height="36" rx="6"
+        <rect x="60" y="534" width="160" height="36" rx="6"
               fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
-        <text x="140" y="514" fill="#94a3b8" font-size="10" text-anchor="middle">
+        <text x="140" y="556" fill="#94a3b8" font-size="10" text-anchor="middle">
           GET /health
         </text>
 
         <!-- 箭头：API → 双回路 -->
         <line x1="220" y1="281" x2="288" y2="281" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
         <line x1="220" y1="339" x2="288" y2="339" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow)"/>
-        <line x1="220" y1="397" x2="288" y2="397" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
-        <line x1="220" y1="455" x2="288" y2="455" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
+        <!-- /feedback 箭头直接下行到 GenBias，不走水平线 -->
+        <line x1="220" y1="439" x2="288" y2="439" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
+        <line x1="220" y1="497" x2="288" y2="497" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
 
         <!-- --- 中栏：双回路 --- -->
 
@@ -274,17 +288,39 @@
           T特质 B行为 D语义 C自洽 P惊奇
         </text>
 
-        <!-- 输出返回 -->
-        <line x1="380" y1="536" x2="380" y2="570" stroke="#a78bfa" stroke-width="1" marker-end="url(#arrow-violet)"/>
-        <!-- 折线回到API层 -->
-        <line x1="290" y1="592" x2="222" y2="592" stroke="#34d399" stroke-width="1" marker-end="url(#arrow-emerald)"/>
+        <!-- ==================== GenBias 生成偏置学习回路 ==================== -->
 
-        <rect x="310" y="575" width="140" height="36" rx="6"
+        <rect x="290" y="555" width="180" height="50" rx="8"
+              fill="rgba(120, 53, 15, 0.2)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="380" y="573" fill="#fbbf24" font-size="10" font-weight="600" text-anchor="middle">
+          GenBias (EMA)
+        </text>
+        <text x="380" y="590" fill="#94a3b8" font-size="8" text-anchor="middle">
+          preferred_profile [T,B,D,C,P] → 偏置注入
+        </text>
+
+        <!-- 反馈箭头：/feedback → GenBias -->
+        <path d="M 220 384 L 220 580 L 290 580"
+              fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+        <text x="208" y="485" fill="#fbbf24" font-size="7" text-anchor="middle" transform="rotate(-90 208 485)">
+          EMA更新profile
+        </text>
+
+        <!-- 偏置注入箭头：GenBias → 回路A -->
+        <line x1="380" y1="555" x2="380" y2="350" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#arrow-amber)"/>
+        <text x="398" y="455" fill="#fbbf24" font-size="7">偏置注入</text>
+
+        <!-- 输出返回 -->
+        <line x1="380" y1="536" x2="380" y2="612" stroke="#a78bfa" stroke-width="1" marker-end="url(#arrow-violet)"/>
+        <!-- 折线回到API层 -->
+        <line x1="290" y1="634" x2="222" y2="634" stroke="#34d399" stroke-width="1" marker-end="url(#arrow-emerald)"/>
+
+        <rect x="310" y="617" width="140" height="36" rx="6"
               fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
-        <text x="380" y="594" fill="white" font-size="9" text-anchor="middle">
+        <text x="380" y="636" fill="white" font-size="9" text-anchor="middle">
           响应 → 用户
         </text>
-        <text x="380" y="606" fill="#94a3b8" font-size="7" text-anchor="middle">
+        <text x="380" y="648" fill="#94a3b8" font-size="7" text-anchor="middle">
           选项 + OOC分 + 反馈闭环
         </text>
 
@@ -363,58 +399,61 @@
 
         <!-- ==================== 睡眠巩固 ==================== -->
 
-        <rect x="60" y="555" width="160" height="80" rx="6"
+        <rect x="60" y="597" width="160" height="80" rx="6"
               fill="rgba(76, 29, 149, 0.15)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,4"/>
-        <text x="140" y="573" fill="#a78bfa" font-size="8" font-weight="600" text-anchor="middle">
+        <text x="140" y="615" fill="#a78bfa" font-size="8" font-weight="600" text-anchor="middle">
           睡眠巩固流程
         </text>
-        <text x="140" y="589" fill="#94a3b8" font-size="7" text-anchor="middle">
+        <text x="140" y="631" fill="#94a3b8" font-size="7" text-anchor="middle">
           ① 事实巩固：情景→语义迁移
         </text>
-        <text x="140" y="603" fill="#94a3b8" font-size="7" text-anchor="middle">
+        <text x="140" y="645" fill="#94a3b8" font-size="7" text-anchor="middle">
           ② 抽象整合：模式提取+剪枝
         </text>
-        <text x="140" y="617" fill="#94a3b8" font-size="7" text-anchor="middle">
+        <text x="140" y="659" fill="#94a3b8" font-size="7" text-anchor="middle">
           ③ 自检报告：认知更新日志
         </text>
 
-        <path d="M 220 595 Q 260 595 290 595 L 290 620 Q 290 640 310 640 L 698 640"
+        <path d="M 220 637 Q 260 637 290 637 L 290 662 Q 290 682 310 682 L 698 682"
               fill="none" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#arrow-violet)"/>
-        <text x="500" y="636" fill="#a78bfa" font-size="7" text-anchor="middle">写入巩固结果</text>
+        <text x="500" y="678" fill="#a78bfa" font-size="7" text-anchor="middle">写入巩固结果</text>
 
         <!-- ==================== 图例 ==================== -->
-        <text x="850" y="640" fill="white" font-size="10" font-weight="600">图例</text>
+        <text x="850" y="682" fill="white" font-size="10" font-weight="600">图例</text>
 
-        <rect x="850" y="652" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
-        <text x="872" y="660" fill="#94a3b8" font-size="8">前端</text>
+        <rect x="850" y="694" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="872" y="702" fill="#94a3b8" font-size="8">前端</text>
 
-        <rect x="850" y="668" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
-        <text x="872" y="676" fill="#94a3b8" font-size="8">后端</text>
+        <rect x="850" y="710" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
+        <text x="872" y="718" fill="#94a3b8" font-size="8">后端</text>
 
-        <rect x="850" y="684" width="16" height="10" rx="2" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1"/>
-        <text x="872" y="692" fill="#94a3b8" font-size="8">云服务 / LLM</text>
+        <rect x="850" y="726" width="16" height="10" rx="2" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1"/>
+        <text x="872" y="734" fill="#94a3b8" font-size="8">云服务 / LLM</text>
 
-        <rect x="850" y="700" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
-        <text x="872" y="708" fill="#94a3b8" font-size="8">记忆 / 存储</text>
+        <rect x="850" y="742" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
+        <text x="872" y="750" fill="#94a3b8" font-size="8">记忆 / 存储</text>
 
-        <rect x="850" y="716" width="16" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
-        <text x="872" y="724" fill="#94a3b8" font-size="8">外部</text>
+        <rect x="850" y="758" width="16" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+        <text x="872" y="766" fill="#94a3b8" font-size="8">外部</text>
 
-        <line x1="850" y1="738" x2="866" y2="738" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
-        <text x="872" y="741" fill="#94a3b8" font-size="8">数据流</text>
+        <line x1="850" y1="780" x2="866" y2="780" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="872" y="783" fill="#94a3b8" font-size="8">GenBias 偏置流</text>
+
+        <line x1="850" y1="796" x2="866" y2="796" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="872" y="799" fill="#94a3b8" font-size="8">数据流</text>
 
         <text x="75" y="248" fill="#94a3b8" font-size="8">API 层</text>
-        <text x="75" y="650" fill="#94a3b8" font-size="8">离线任务</text>
+        <text x="75" y="692" fill="#94a3b8" font-size="8">离线任务</text>
 
         <!-- ==================== 补充标注 ==================== -->
         <!-- 心理学理论脚注 -->
-        <rect x="700" y="680" width="320" height="55" rx="6"
+        <rect x="700" y="722" width="320" height="55" rx="6"
               fill="rgba(76, 29, 149, 0.1)" stroke="#a78bfa" stroke-width="0.5" stroke-dasharray="2,2"/>
-        <text x="720" y="696" fill="#a78bfa" font-size="7">心理学理论支撑</text>
-        <text x="720" y="710" fill="#94a3b8" font-size="7">
+        <text x="720" y="738" fill="#a78bfa" font-size="7">心理学理论支撑</text>
+        <text x="720" y="752" fill="#94a3b8" font-size="7">
           Baddeley工作记忆 · Tulving情景/语义 · Zwaan事件索引
         </text>
-        <text x="720" y="724" fill="#94a3b8" font-size="7">
+        <text x="720" y="766" fill="#94a3b8" font-size="7">
           Asch中心特质 · Kintsch建构-整合 · Bartlett图式
         </text>
       </svg>

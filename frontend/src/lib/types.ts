@@ -81,6 +81,10 @@ export interface CharacterProfile {
   traits: Trait[];
   patterns: BehaviorPattern[];
   relationships: Relationship[];
+  /** Backend fields — populated by /profile API */
+  arc_stage?: string;
+  motivation?: string;
+  backstory?: string;
 }
 
 export interface LogPhase {

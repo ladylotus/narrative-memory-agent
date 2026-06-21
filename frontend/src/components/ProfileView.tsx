@@ -23,10 +23,10 @@ export default function ProfileView({
       <div className="scroll">
         <div className="empty">
           <div className="e-mark">📋</div>
-          <div className="e-title">{char.name} 还没有档案</div>
+          <div className="e-title">{char.name} doesn't have a profile yet</div>
           <div className="e-desc">
-            Agent还没有收集到足够的证据来建模{char.name.split(" ")[0]}。
-            先聊几次，然后跑一个巩固周期。
+            The agent doesn't have enough evidence to model {char.name.split(" ")[0]}.
+            Have a few conversations first, then run a consolidation cycle.
           </div>
         </div>
       </div>
@@ -40,16 +40,16 @@ export default function ProfileView({
       <div className="page">
         {/* Header */}
         <div className="page-head">
-          <div className="page-title">🧠 认知档案</div>
+          <div className="page-title">🧠 Cognitive Profile</div>
           <div className="page-desc">
-            Agent目前对{char.name}的认知——基于「{NMA_NOVEL.title}」，
-            经过 {NMA_LOG.cycle} 次巩固周期提炼。
+            The agent's current understanding of {char.name} — based on "{NMA_NOVEL.title}",
+            refined over {NMA_LOG.cycle} consolidation cycles.
           </div>
         </div>
 
         {/* Traits */}
         <div className="sec-label">
-          特质 <span className="sec-count">· {profile.traits.length}</span>
+          Traits <span className="sec-count">· {profile.traits.length}</span>
         </div>
         {profile.traits.map((t, i) => (
           <div className="trait" key={i}>
@@ -64,13 +64,13 @@ export default function ProfileView({
             </div>
             <TraitBar pct={t.conf * 100} />
             <div className="trait-evidence">
-              📄 {t.evidence} 个支撑段落
+              📄 {t.evidence} supporting passages
             </div>
           </div>
         ))}
 
         {/* Relationship network */}
-        <div className="sec-label">🔗 关系网络</div>
+        <div className="sec-label">🔗 Relationship Network</div>
         <div className="constellation">
           <svg
             style={{ position: "absolute", inset: 0, width: "100%", height: "100%" }}
@@ -107,7 +107,7 @@ export default function ProfileView({
 
         {/* Behavior patterns */}
         <div className="sec-label">
-          🔄 行为模式 <span className="sec-count">· {profile.patterns.length}</span>
+          🔄 Behavior Patterns <span className="sec-count">· {profile.patterns.length}</span>
         </div>
         {profile.patterns.map((p, i) => (
           <div className="pattern" key={i}>
@@ -122,7 +122,7 @@ export default function ProfileView({
                 ))}
               </span>
               <span className="ptext">
-                {["弱", "较弱", "中等", "较强", "强"][p.strength]}
+                {["Weak", "Mild", "Moderate", "Strong", "Very Strong"][p.strength]}
               </span>
             </div>
           </div>

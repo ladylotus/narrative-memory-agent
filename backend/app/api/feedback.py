@@ -3,11 +3,11 @@
 Receives the user's choice and mark (why they chose it), then updates
 the character's preferred_profile via EMA.
 
-Mark options (from 方案文档.md §九):
-  □ 这就是他会做的事      → 角色驱动 → EMA α=0.3
-  □ 情节需要这个走向      → 剧情驱动 → 不更新
-  □ 想看看这个可能性      → 实验心态 → 不更新
-  □ 说不上来，就是感觉    → 默认     → EMA α=0.1
+Mark options (from 设计文档.md §九):
+  □ role-driven       → character-driven → EMA a=0.3
+  □ plot-driven       → plot-driven      → no update
+  □ experimental      → experimental     → no update
+  □ gut-feeling       → default          → EMA a=0.1
 """
 
 from __future__ import annotations

@@ -23,7 +23,7 @@ async def trigger_sleep(character_name: str):
     """Trigger off-line memory consolidation (Phase 1-2-3).
 
     Analyzes events in episodic memory, detects behavioral conflicts,
-    adjusts importance scores, and updates the character's semantic profile.
+    adjusts importance scores, and updates the character's profile.
     Returns a consolidation report.
     """
     service = _get_service()

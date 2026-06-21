@@ -5,10 +5,10 @@ a 5-dim vector [T, B, D, C, P], based on which options the user marks as
 fitting the character.
 
 Decision logic (from 方案文档.md §九, 2026/6/9 复盘):
-  - marks contains "角色驱动"      → alpha=0.3  (正常更新)
-  - marks only "剧情驱动/实验心态"  → 不更新
-  - marks only "说不上来"          → alpha=0.1  (低权重)
-  - marks empty (auto mode)        → alpha=0.15 (静默)
+  - marks contains "role-driven"      → alpha=0.3  (normal update)
+  - marks only "plot-driven/experimental"  → no update (0.0)
+  - marks only "gut feeling"          → alpha=0.1  (low weight)
+  - marks empty (auto mode)            → alpha=0.15 (silent)
 """
 
 from __future__ import annotations
@@ -21,15 +21,15 @@ __all__ = ["update_preferred_profile"]
 
 DIMENSION_KEYS = ["T", "B", "D", "C", "P"]
 
-ALPHA_CHARACTER_DRIVEN = 0.30   # "这就是他会做的事"
-ALPHA_GUT_FEELING = 0.10        # "说不上来，就是感觉"
-ALPHA_AUTO = 0.15               # 默认自动（不弹窗，静默更新）
-ALPHA_NONE = 0.0                # 剧情驱动/实验心态（不更新）
+ALPHA_CHARACTER_DRIVEN = 0.30   # "role-driven"
+ALPHA_GUT_FEELING = 0.10        # "gut feeling"
+ALPHA_AUTO = 0.15               # auto mode (no popup, silent update)
+ALPHA_NONE = 0.0                # plot-driven / experimental (no update)
 
-MARK_CHARACTER_DRIVEN = "这就是他会做的事"
-MARK_PLOT_DRIVEN = "情节需要这个走向"
-MARK_EXPERIMENTAL = "想看看这个可能性"
-MARK_GUT_FEELING = "说不上来，就是感觉"
+MARK_CHARACTER_DRIVEN = "role-driven"
+MARK_PLOT_DRIVEN = "plot-driven"
+MARK_EXPERIMENTAL = "experimental"
+MARK_GUT_FEELING = "gut-feeling"
 
 # ── Logic ──────────────────────────────────────────────
 

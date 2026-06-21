@@ -1,0 +1,35 @@
+# —— NMA: Narrative Memory Agent ——
+# Qwen Cloud Hackathon — Track 1: MemoryAgent
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ../Dockerfile.backend
+    container_name: nma-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - nma-data:/app/data
+    env_file:
+      - ./backend/.env
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: ../Dockerfile.frontend
+    container_name: nma-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      # In Docker, frontend calls backend via docker network
+      - NEXT_PUBLIC_API_URL=http://backend:8000
+    restart: unless-stopped
+
+volumes:
+  nma-data:

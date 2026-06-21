@@ -6,7 +6,7 @@ Pipeline:
   3. Build NarrativeEvent objects with Zwaan indexing
   4. Generate embeddings via text-embedding-v3
   5. Store events → EpisodicMemory (SQLite + ChromaDB)
-  6. Upsert characters → Database + SemanticMemory
+  6. Upsert characters → Database (SQLite characters table)
 """
 
 from __future__ import annotations

@@ -25,7 +25,10 @@ export default function IngestionView({
       setResult(res);
       onCharactersCreated();
     } catch (e) {
-      setError(String(e));
+      const detail = e instanceof Error ? e.message : String(e);
+      setError(
+        detail.length > 120 ? detail.slice(0, 120) + "…" : detail
+      );
     } finally {
       setLoading(false);
     }
@@ -35,9 +38,9 @@ export default function IngestionView({
     <div className="scroll">
       <div className="page">
         <div className="page-head">
-          <div className="page-title">📖 阅读室</div>
+          <div className="page-title">📖 Reading Room</div>
           <div className="page-desc">
-            贴入小说文本，我会分析角色、事件和关系，构建三层记忆。
+            Paste novel text — I'll analyze characters, events, and relationships, then build a three-layer memory.
           </div>
         </div>
 
@@ -45,7 +48,7 @@ export default function IngestionView({
         <div className="settings-group" style={{ marginTop: 24 }}>
           <div className="settings-row" style={{ flexDirection: "column", gap: 8, alignItems: "stretch" }}>
             <div className="settings-label">
-              <span className="sl-name">标题（可选）</span>
+              <span className="sl-name">Title (optional)</span>
             </div>
             <input
               className="ingest-input"
@@ -57,9 +60,9 @@ export default function IngestionView({
 
           <div className="settings-row" style={{ flexDirection: "column", gap: 8, alignItems: "stretch" }}>
             <div className="settings-label">
-              <span className="sl-name">小说文本</span>
+              <span className="sl-name">Novel Text</span>
               <span className="sl-desc">
-                粘贴章节内容或完整片段
+                Paste chapter content or a full excerpt
               </span>
             </div>
             <textarea
@@ -77,7 +80,7 @@ export default function IngestionView({
               disabled={!text.trim() || loading}
               onClick={handleAnalyze}
             >
-              {loading ? "🔮 分析中…" : "📥 摄入并分析"}
+              {loading ? "🔮 Analyzing…" : "📥 Ingest & Analyze"}
             </button>
           </div>
         </div>
@@ -92,31 +95,31 @@ export default function IngestionView({
         {/* Results */}
         {result && (
           <div className="ingest-result fadein">
-            <div className="ir-head">✅ 分析完成</div>
+            <div className="ir-head">✅ Analysis Complete</div>
             <div className="ir-stats">
               <div className="ir-stat">
                 <span className="ir-n">{result.chunks_processed}</span>
-                <span className="ir-l">文本块</span>
+                <span className="ir-l">chunks</span>
               </div>
               <div className="ir-stat">
                 <span className="ir-n">{result.events_extracted}</span>
-                <span className="ir-l">事件</span>
+                <span className="ir-l">events</span>
               </div>
               <div className="ir-stat">
                 <span className="ir-n">{result.characters_found.length}</span>
-                <span className="ir-l">角色</span>
+                <span className="ir-l">characters</span>
               </div>
               {result.new_characters.length > 0 && (
                 <div className="ir-stat">
                   <span className="ir-n ir-new">+{result.new_characters.length}</span>
-                  <span className="ir-l">新角色</span>
+                  <span className="ir-l">new</span>
                 </div>
               )}
             </div>
 
             {result.characters_found.length > 0 && (
               <div className="ir-chars">
-                <div className="ir-sub">识别的角色：</div>
+                <div className="ir-sub">Characters identified:</div>
                 <div className="ir-tags">
                   {result.characters_found.map((name) => (
                     <span
@@ -132,7 +135,7 @@ export default function IngestionView({
             )}
 
             <div className="ir-foot">
-              <span>→ 前往 <strong>💬 对话</strong> 标签页与角色交流</span>
+              <span>→ Go to <strong>💬 Chat</strong> to talk with characters</span>
             </div>
           </div>
         )}
@@ -141,7 +144,7 @@ export default function IngestionView({
         {loading && (
           <div className="ingest-thinking fadein">
             <span className="pulse"><i /><i /><i /></span>
-            <span>🔮 正在阅读文本，提取角色和事件…</span>
+            <span>🔮 Reading text, extracting characters and events…</span>
           </div>
         )}
       </div>

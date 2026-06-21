@@ -1,7 +1,7 @@
 """Sleep consolidation service — three-phase memory consolidation cycle.
 
 Analogous to the human sleep cycle:
-  Phase 1 (NREM/SWS) — Episodic → semantic migration, conflict detection
+  Phase 1 (NREM/SWS) — Conflict detection, importance adjustment
   Phase 2 (REM)      — LLM pattern extraction + vector redundancy pruning
                        + emotion tagging + arc progression + confidence adjustment
   Phase 3            — Consolidation report

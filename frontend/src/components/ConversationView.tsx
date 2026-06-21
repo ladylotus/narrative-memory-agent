@@ -5,10 +5,10 @@ import type { Option, Risk, Scene, Character, ConvoState, Turn } from "@/lib/typ
 
 /* ─── Mark options ─────────────────────────── */
 const MARK_OPTIONS = [
-  { value: "这就是他会做的事", label: "这就是他会做的事", icon: "🎯" },
-  { value: "情节需要这个走向", label: "情节需要这个走向", icon: "📜" },
-  { value: "想看看这个可能性", label: "想看看这个可能性", icon: "🔮" },
-  { value: "说不上来，就是感觉", label: "说不上来，就是感觉", icon: "🤔" },
+  { value: "role-driven", label: "It's what they'd do", icon: "🎯" },
+  { value: "plot-driven", label: "The plot needs this", icon: "📜" },
+  { value: "experimental", label: "Curious about this path", icon: "🔮" },
+  { value: "gut-feeling", label: "Just feels right", icon: "🤔" },
 ] as const;
 
 /* ─── RiskBadge ─── */
@@ -76,7 +76,7 @@ function FeedbackBar({
     return (
       <div className="feedback fadein">
         <div className="fb-done" style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--risk-low)" }}>
-          ✅ 已存入记忆 · 将在下次生成中参考你的偏好
+          ✅ Saved to memory · Your preference will guide future generations
         </div>
       </div>
     );
@@ -84,7 +84,7 @@ function FeedbackBar({
 
   return (
     <div className="feedback fadein">
-      <div className="fb-q">💡 你选这个是因为……？</div>
+      <div className="fb-q">💡 Why did you choose this?</div>
       <div className="fb-marks">
         {MARK_OPTIONS.map((o) => {
           const sel = marks.includes(o.value);
@@ -101,14 +101,14 @@ function FeedbackBar({
       </div>
       <div className="fb-note">
         <textarea
-          placeholder="可选——写下你的想法，这将成为记忆的一部分。"
+          placeholder="Optional — your notes become part of memory."
           value={note}
           onChange={(e) => onNote(e.target.value)}
         />
       </div>
       <div className="row-actions">
         <button className="btn primary" disabled={marks.length === 0} onClick={onSubmit}>
-          💾 存入记忆
+          💾 Save to Memory
         </button>
       </div>
     </div>
@@ -124,6 +124,7 @@ export default function ConversationView({
   actions,
   hasContent,
   feedbackPreference = "always",
+  resumeStatus = null,
 }: {
   char: Character;
   scene: Scene;
@@ -138,6 +139,7 @@ export default function ConversationView({
   };
   hasContent: boolean;
   feedbackPreference?: "always" | "on-ooc" | "never";
+  resumeStatus?: { has_resumed: boolean; turn_count: number; last_question: string } | null;
 }) {
   const shortName = char.name.split(" ")[0];
 
@@ -164,12 +166,17 @@ export default function ConversationView({
   if (!hasContent) {
     return (
       <div className="scroll">
+        {resumeStatus?.has_resumed && (
+          <div className="resume-banner fadein">
+            🔁 Welcome back — {resumeStatus.turn_count} previous exchanges remembered.
+            {resumeStatus.last_question && <> Last topic: <em>"{resumeStatus.last_question.slice(0, 80)}"</em></>}
+          </div>
+        )}
         <div className="empty">
           <div className="e-mark">🎭</div>
-          <div className="e-title">{char.name} 还在成形中</div>
+          <div className="e-title">{char.name} is still taking shape</div>
           <div className="e-desc">
-            置信度 {Math.round(char.confidence * 100)}%。问{shortName}一个问题，
-            每次回答和你的反馈都会进入下一次巩固周期。
+            {Math.round(char.confidence * 100)}% confidence. Ask {shortName} a question — every answer and your feedback feeds the next consolidation cycle.
           </div>
         </div>
         <Composer shortName={shortName} onSend={actions.onSend} />
@@ -181,6 +188,13 @@ export default function ConversationView({
 
   return (
     <div className="scroll">
+      {resumeStatus?.has_resumed && (
+        <div className="resume-banner fadein">
+          🔁 Welcome back — {resumeStatus.turn_count} previous exchanges remembered.
+          {resumeStatus.last_question && <> Last topic: <em>"{resumeStatus.last_question.slice(0, 80)}"</em></>}
+        </div>
+      )}
+
       <div className="convo">
         {/* Scene card */}
         <div className="scene-card">
@@ -191,7 +205,7 @@ export default function ConversationView({
 
         {/* Turn label */}
         <div className="turn-label">
-          🎭 {options.length} 个发展方向，按契合度排序
+          🎭 {options.length} paths, sorted by likelihood
         </div>
 
         {/* Options */}
@@ -230,7 +244,7 @@ export default function ConversationView({
             {t.options && (
               <>
                 <div className="turn-label">
-                  🎭 {t.options.length} 个方向
+                  🎭 {t.options.length} paths
                 </div>
                 <div className="options">
                   {t.options.map((opt, i) => (
@@ -253,7 +267,7 @@ export default function ConversationView({
         {convo.thinking && (
           <div className="thinking fadein">
             <span className="pulse"><i /><i /><i /></span>
-            🔮 正在读取{shortName}的记忆…
+            🔮 Reading {shortName}'s memory…
           </div>
         )}
       </div>
@@ -299,7 +313,7 @@ function Composer({
               }
             }}
           >
-            如果是你，你会？
+            What would you do?
           </button>
         </div>
       </div>

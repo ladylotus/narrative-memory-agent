@@ -36,13 +36,13 @@ export default function Sidebar({
         <div className="nc-meta">
           <div className="nc-title">{novel.title}</div>
           <div className="nc-sub">
-            {characters.length} 个角色 · {novel.chapters} 章
+            {characters.length} characters · {novel.chapters} chapters
           </div>
         </div>
       </div>
 
       {/* Character list */}
-      <div className="side-label">角色</div>
+      <div className="side-label">Characters</div>
       <div className="char-list">
         {characters.map((c) => (
           <div
@@ -59,9 +59,9 @@ export default function Sidebar({
                 {c.flag ? (
                   <>{c.flag}</>
                 ) : c.status === "forming" ? (
-                  <>🌱 形成中 · {Math.round(c.confidence * 100)}%</>
+                  <>🌱 Forming · {Math.round(c.confidence * 100)}%</>
                 ) : (
-                  <>🧠 {Math.round(c.confidence * 100)}% 置信度</>
+                  <>🧠 {Math.round(c.confidence * 100)}% confidence</>
                 )}
               </div>
             </div>
@@ -72,13 +72,13 @@ export default function Sidebar({
       {/* Footer actions */}
       <div className="side-foot">
         <button className="side-action" onClick={() => onNav("settings")}>
-          📤 导入文本
+          📤 Import Text
         </button>
         <button
           className={`side-action${view === "settings" ? " active" : ""}`}
           onClick={() => onNav("settings")}
         >
-          ⚙️ 设置
+          ⚙️ Settings
         </button>
       </div>
     </aside>

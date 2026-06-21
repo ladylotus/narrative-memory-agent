@@ -6,7 +6,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import ask, feedback, ingest, profile, sleep
+from app.api import ask, feedback, ingest, profile, session, sleep
 from app.seed import seed_demo_character
 
 app = FastAPI(
@@ -34,6 +34,7 @@ app.include_router(ask.router, prefix="/ask", tags=["ask"])
 app.include_router(feedback.router, prefix="/feedback", tags=["feedback"])
 app.include_router(profile.router, prefix="/profile", tags=["profile"])
 app.include_router(sleep.router, prefix="/sleep", tags=["sleep"])
+app.include_router(session.router, prefix="/session", tags=["session"])
 
 
 @app.get("/health")

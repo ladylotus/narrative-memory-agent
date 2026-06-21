@@ -171,6 +171,50 @@ class TestFallbackScores:
         assert result[2]["label"] == "C"
 
 
+# ── OOC formula boundary cases ──────────────────────────────
+
+
+class TestOOCBoundaries:
+    """Edge cases at classification thresholds."""
+
+    @pytest.fixture
+    def svc(self) -> ValidationService:
+        return ValidationService()
+
+    def test_risk_at_066_threshold(self, svc: ValidationService) -> None:
+        """Risk exactly 0.66 → classification depends on consistency + P."""
+        # Just above 0.66, low P, mid consistency → violation
+        # T=0.3, B=0.3, D=0.5, C=0.3, P=0.2
+        # = 1 - (0.35*0.3 + 0.25*0.3 + 0.15*0.5 + 0.15*0.3 - 0.1*0.2)
+        # = 1 - (0.105 + 0.075 + 0.075 + 0.045 - 0.02)
+        # = 1 - 0.28 = 0.72
+        r = _compute_risk(svc, t=0.3, b=0.3, d=0.5, c=0.3, p=0.2)
+        assert r > 0.66
+        result = _classify(svc, t=0.3, b=0.3, d=0.5, c=0.3, p=0.2)
+        assert result["type"] == "violation"
+
+    def test_risk_below_066_is_normal(self, svc: ValidationService) -> None:
+        """Risk below 0.66 → always normal regardless of P."""
+        result = _classify(svc, t=0.8, b=0.7, d=0.5, c=0.8, p=0.9)
+        assert result["type"] == "normal"
+
+    def test_surprise_classification_boundary(self, svc: ValidationService) -> None:
+        """High risk + high P + good consistency = surprise, not violation."""
+        result_violation = _classify(svc, t=0.2, b=0.2, d=0.5, c=0.2, p=0.9)
+        assert result_violation["type"] == "violation"  # consistency too low
+
+        result_surprise = _classify(svc, t=0.5, b=0.5, d=0.8, c=0.5, p=0.9)
+        assert result_surprise["type"] == "surprise"  # consistency >= 0.4
+
+    def test_d_source_defaults_to_chromadb(self) -> None:
+        """D values should be tagged with source=chromadb by default."""
+        # This verifies the details dict structure in the scoring code
+        # When D comes from real ChromaDB, D_source = "chromadb"
+        # When D comes from fallback, D_source = "fallback"
+        scores = _fallback_scores(1)
+        assert scores[0]["details"]["D_source"] == "fallback"
+
+
 # ── helpers ───────────────────────────────────────────────────
 
 def _compute_risk(

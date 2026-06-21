@@ -42,6 +42,17 @@ def _init_db(conn: sqlite3.Connection) -> None:
             created_at  TEXT DEFAULT (datetime('now')),
             updated_at  TEXT DEFAULT (datetime('now'))
         );
+
+        -- Cross-session memory: serialized working memory for each character
+        CREATE TABLE IF NOT EXISTS session_state (
+            character   TEXT PRIMARY KEY,
+            turns       TEXT NOT NULL DEFAULT '[]',   -- JSON list of {role, content}
+            last_question TEXT NOT NULL DEFAULT '',
+            last_options TEXT,                         -- JSON list of Option dicts
+            preferred_profile TEXT,                    -- JSON [T,B,D,C,P]
+            created_at  TEXT DEFAULT (datetime('now')),
+            updated_at  TEXT DEFAULT (datetime('now'))
+        );
     """)
     conn.commit()
 
@@ -102,13 +113,63 @@ def list_characters() -> list[str]:
 
 
 # ──────────────────────────────────────────────
+#  Session state CRUD (cross-session memory)
+# ──────────────────────────────────────────────
+
+
+def get_session_state(character: str) -> dict[str, Any] | None:
+    """Load serialised working memory for a character, or None."""
+    conn = get_conn()
+    row = conn.execute(
+        "SELECT * FROM session_state WHERE character = ?", (character,)
+    ).fetchone()
+    if row is None:
+        return None
+    return _deserialise(dict(row))
+
+
+def upsert_session_state(data: dict[str, Any]) -> None:
+    """Save or update serialised working memory for a character."""
+    conn = get_conn()
+    row = _serialise(data)
+    conn.execute(
+        """
+        INSERT INTO session_state
+            (character, turns, last_question, last_options, preferred_profile, updated_at)
+        VALUES (?, ?, ?, ?, ?, datetime('now'))
+        ON CONFLICT(character) DO UPDATE SET
+            turns             = excluded.turns,
+            last_question     = excluded.last_question,
+            last_options      = excluded.last_options,
+            preferred_profile = excluded.preferred_profile,
+            updated_at        = datetime('now')
+        """,
+        (
+            row["character"],
+            row["turns"],
+            row["last_question"],
+            row.get("last_options"),
+            row.get("preferred_profile"),
+        ),
+    )
+    conn.commit()
+
+
+def delete_session_state(character: str) -> None:
+    """Remove saved session state (e.g. after sleep consolidation)."""
+    conn = get_conn()
+    conn.execute("DELETE FROM session_state WHERE character = ?", (character,))
+    conn.commit()
+
+
+# ──────────────────────────────────────────────
 #  Serialisation helpers
 # ──────────────────────────────────────────────
 
 def _serialise(data: dict[str, Any]) -> dict[str, Any]:
     """Convert Python objects to JSON strings for SQLite storage."""
     out = dict(data)
-    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile"):
+    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options"):
         if key in out and not isinstance(out.get(key), str):
             out[key] = json.dumps(out[key], ensure_ascii=False)
     return out
@@ -117,7 +178,7 @@ def _serialise(data: dict[str, Any]) -> dict[str, Any]:
 def _deserialise(row: dict[str, Any]) -> dict[str, Any]:
     """Convert JSON strings back to Python objects."""
     out = dict(row)
-    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile"):
+    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options"):
         val = out.get(key)
         if val and isinstance(val, str):
             try:

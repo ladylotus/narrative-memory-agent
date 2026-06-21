@@ -6,7 +6,10 @@
 
 import type { Character, Option, CharacterProfile as FrontendProfile, Trait, BehaviorPattern, Relationship } from "./types";
 
-const API = "http://localhost:8000";
+const API =
+  (typeof process !== "undefined" &&
+    (process.env as Record<string, string>)["NEXT_PUBLIC_API_URL"]) ||
+  "http://localhost:8000";
 
 // ── Backend raw types ──────────────────────────────────
 
@@ -60,6 +63,45 @@ interface BSleepResp {
       confidence_delta: number;
     };
   };
+}
+
+/**
+ * Fetch resume status — check if a character has saved session state
+ */
+export interface ResumeStatus {
+  character: string;
+  has_resumed: boolean;
+  turn_count: number;
+  last_question: string;
+  preferred_profile: number[] | null;
+}
+
+export async function fetchResumeStatus(character: string): Promise<ResumeStatus> {
+  const res = await fetch(`${API}/session/resume/${encodeURIComponent(character)}`);
+  if (!res.ok) return { character, has_resumed: false, turn_count: 0, last_question: "", preferred_profile: null };
+  return res.json();
+}
+
+/**
+ * Checkpoint working memory — save current session state
+ */
+export async function checkpointSession(character: string, lastQuestion?: string): Promise<void> {
+  await fetch(`${API}/session/checkpoint`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ character, last_question: lastQuestion ?? "" }),
+  });
+}
+
+/**
+ * Clear session state — after sleep consolidation
+ */
+export async function clearSession(character: string): Promise<void> {
+  await fetch(`${API}/session/clear`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ character }),
+  });
 }
 
 // ── Character metadata (static until IngestionService) ─
@@ -202,20 +244,20 @@ function mapOption(opt: BOption, idx: number): Option {
   // Classify high risk: violation vs surprise
   const oocType = (opt.ooc_details?.type as string) || "normal";
 
-  // Use backend's risk tag (低风险/中风险/高风险) if available
+  // Use backend's risk tag (low/medium/high) if available
   const backendTag = opt.ooc_details?.tag as string | undefined;
 
   const labels: Record<string, string> = {
-    low: "✅ 贴合",
-    med: "⚠️ 偏移",
-    high: "❌ 崩人设",
+    low: "✅ Fitting",
+    med: "⚠️ Off-track",
+    high: "❌ OOC",
   };
 
   // Override high-risk label based on violation/surprise type
   let label = labels[level];
   if (level === "high") {
-    if (oocType === "violation") label = "🚫 偏离角色";
-    else if (oocType === "surprise") label = "🟠 出乎意料";
+    if (oocType === "violation") label = "🚫 OOC Violation";
+    else if (oocType === "surprise") label = "🟠 Surprising";
   }
 
   // Extract T/B/D/C/P from ooc_details

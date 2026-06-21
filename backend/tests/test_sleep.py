@@ -33,19 +33,19 @@ def _inject_test_events() -> None:
         );
 
         INSERT OR REPLACE INTO events (id, chapter, position, protagonist, summary, importance, zwaan_dims) VALUES
-            ('test_e1', 1, '1/4', 'Caelan Ashmark',
+            ('test_e1', 1, '1/4', 'Elizabeth Bennet',
              'Caelan chose to withdraw from the negotiation rather than force a confrontation.',
              0.4, '{"time":"evening","space":"hall","causality":"political pressure","intent":"avoid"}'),
-            ('test_e2', 3, '2/4', 'Caelan Ashmark',
+            ('test_e2', 3, '2/4', 'Elizabeth Bennet',
              'Caelan secretly undermined Corvan to secure a trade deal, breaking a private oath.',
              0.8, '{"time":"night","space":"study","causality":"betrayal of trust","intent":"betray"}'),
-            ('test_e3', 4, '3/4', 'Caelan Ashmark',
+            ('test_e3', 4, '3/4', 'Elizabeth Bennet',
              'When challenged publicly, Caelan retreated instead of asserting his authority.',
              0.6, '{"time":"afternoon","space":"great hall","causality":"public challenge","intent":"flee"}'),
-            ('test_e4', 2, '1/2', 'Caelan Ashmark',
+            ('test_e4', 2, '1/2', 'Elizabeth Bennet',
              'Caelan reviewed quarterly pack reports and approved the budget.',
              0.2, '{"time":"morning","space":"office","causality":"routine","intent":"manage"}'),
-            ('test_e5', 5, '1/1', 'Caelan Ashmark',
+            ('test_e5', 5, '1/1', 'Elizabeth Bennet',
              'An elder pack member died unexpectedly. Caelan handled the arrangements in silence.',
              0.5, '{"time":"dawn","space":"pack grounds","causality":"death","intent":"manage"}');
     """)
@@ -80,8 +80,8 @@ class TestSleepCycle:
         assert "not found" in data["message"]
 
     def test_sleep_no_events(self) -> None:
-        """Caelan exists but has no events yet. Should return empty report."""
-        resp = client.post("/sleep/Caelan Ashmark")
+        """Elizabeth exists but has no events yet. Should return empty report."""
+        resp = client.post("/sleep/Elizabeth Bennet")
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "ok"
@@ -89,11 +89,11 @@ class TestSleepCycle:
 
     def test_sleep_full_cycle(self) -> None:
         _inject_test_events()
-        resp = client.post("/sleep/Caelan Ashmark")
+        resp = client.post("/sleep/Elizabeth Bennet")
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "ok"
-        assert data["character"] == "Caelan Ashmark"
+        assert data["character"] == "Elizabeth Bennet"
 
         report = data["report"]
         p1 = report["phase1"]
@@ -106,36 +106,36 @@ class TestSleepCycle:
         assert len(p1["importance_adjustments"]) >= 1
 
         # Phase 3 summary
-        assert "5 个事件" in p3["summary"]
-        assert "冲突" in p3["summary"]
+        assert "5 events" in p3["summary"]
+        assert "conflict" in p3["summary"]
 
         print(f"\n{'='*50}")
-        print(f"📋 睡眠巩固报告")
+        print(f"📋 Sleep Consolidation Report")
         print(f"{'='*50}")
-        print(f"📊 分析: {p1['events_analyzed']} 个事件")
-        print(f"⚡ 冲突: {json.dumps(p1['conflicts_detected'], ensure_ascii=False, indent=2)}")
-        print(f"🔺 重要性调整: {json.dumps(p1['importance_adjustments'], ensure_ascii=False, indent=2)}")
-        print(f"🔄 弧光变化: {json.dumps(p2['arc_stage_change'], ensure_ascii=False, indent=2)}")
-        print(f"📉 特质更新: {json.dumps(p2['trait_updates'], ensure_ascii=False, indent=2)}")
-        print(f"📋 摘要: {p3['summary']}")
+        print(f"📊 Analyzed: {p1['events_analyzed']} events")
+        print(f"⚡ Conflicts: {json.dumps(p1['conflicts_detected'], ensure_ascii=False, indent=2)}")
+        print(f"🔺 Importance adjustments: {json.dumps(p1['importance_adjustments'], ensure_ascii=False, indent=2)}")
+        print(f"🔄 Arc change: {json.dumps(p2['arc_stage_change'], ensure_ascii=False, indent=2)}")
+        print(f"📉 Trait updates: {json.dumps(p2['trait_updates'], ensure_ascii=False, indent=2)}")
+        print(f"📋 Summary: {p3['summary']}")
 
     def test_sleep_history(self) -> None:
-        resp = client.get("/sleep/Caelan Ashmark/history")
+        resp = client.get("/sleep/Elizabeth Bennet/history")
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "ok"
 
     def test_sleep_idempotent(self) -> None:
         _inject_test_events()
-        resp1 = client.post("/sleep/Caelan Ashmark")
-        resp2 = client.post("/sleep/Caelan Ashmark")
+        resp1 = client.post("/sleep/Elizabeth Bennet")
+        resp2 = client.post("/sleep/Elizabeth Bennet")
         assert resp1.status_code == 200
         assert resp2.status_code == 200
 
     def test_event_importance_persisted(self) -> None:
         """Death event should have importance boosted from 0.5 → 0.65 in DB."""
         _inject_test_events()
-        client.post("/sleep/Caelan Ashmark")
+        client.post("/sleep/Elizabeth Bennet")
 
         conn = sqlite3.connect(str(SQLITE_PATH))
         row = conn.execute(

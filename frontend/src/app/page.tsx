@@ -7,12 +7,17 @@ import ProfileView from "@/components/ProfileView";
 import SleepLogView from "@/components/SleepLogView";
 import SettingsView from "@/components/SettingsView";
 import IngestionView from "@/components/IngestionView";
+import ErrorToast from "@/components/ErrorToast";
+import type { ErrorInfo } from "@/components/ErrorToast";
 import {
   fetchCharacters,
   askCharacter,
   fetchProfile,
   triggerSleep,
   submitFeedback,
+  fetchResumeStatus,
+  checkpointSession,
+  clearSession,
 } from "@/lib/api";
 import { NMA_NOVEL, freshConvo } from "@/lib/data";
 import type { Character, Option, ConvoState, Scene } from "@/lib/types";
@@ -29,7 +34,8 @@ export default function Home() {
   const [sleepReport, setSleepReport] = useState<SleepReport | null>(null);
   const [feedbackPreference, setFeedbackPreference] = useState("always");
   const [loading, setLoading] = useState(true);
-  const [errorMsg, setErrorMsg] = useState(null);
+  const [errorMsg, setErrorMsg] = useState<ErrorInfo | null>(null);
+  const [resumeStatus, setResumeStatus] = useState<{ has_resumed: boolean; turn_count: number; last_question: string } | null>(null);
 
   // Load character list on mount
   useEffect(() => {
@@ -41,7 +47,7 @@ export default function Home() {
       setLoading(false);
     }).catch(() => {
       setLoading(false);
-      setErrorMsg("无法连接后端服务——请确认 FastAPI 是否在 localhost:8000 运行");
+      setErrorMsg({ type: "backend-down" });
     });
   }, []);
 
@@ -54,21 +60,28 @@ export default function Home() {
     fetchProfile(activeChar).then((p) => {
       setProfile(p);
       if (!p) {
-        setErrorMsg(`无法加载角色「${activeChar}」的档案——后端可能尚未摄入该角色`);
-        setTimeout(() => setErrorMsg(null), 5000);
+        setErrorMsg({ type: "character-not-found", character: activeChar });
         return;
       }
       // Build an initial scene from the character's backstory
       if (p) {
         setScene({
-          eyebrow: `📖 ${char.name} · 当前状态`,
-          text: `你面前站着${char.name}。${
-            (p as any)?.arc_stage
-              ? `他的弧光阶段：${(p as any).arc_stage}。`
+          eyebrow: `📖 ${char.name} · Current Status`,
+          text: `${char.name} stands before you.${
+            p.arc_stage
+              ? ` Arc stage: ${p.arc_stage}.`
               : ""
           }`,
-          question: `你想问${char.name.split(" ")[0]}什么？`,
+          question: `What would you ask ${char.name.split(" ")[0]}?`,
         });
+      }
+    });
+    // Check for cross-session memory (returning user)
+    fetchResumeStatus(activeChar).then((r) => {
+      if (r.has_resumed) {
+        setResumeStatus({ has_resumed: true, turn_count: r.turn_count, last_question: r.last_question });
+      } else {
+        setResumeStatus(null);
       }
     });
     // Reset conversation state
@@ -103,7 +116,7 @@ export default function Home() {
         const result = await askCharacter(activeChar, fullQuestion, 3);
         setScene((prev) =>
           prev
-            ? { ...prev, text: fullQuestion, question: "你会怎么做？" }
+            ? { ...prev, text: fullQuestion, question: "What do you do?" }
             : prev
         );
         setOptions(result.options);
@@ -118,8 +131,10 @@ export default function Home() {
         });
       } catch (e) {
         updateConvo({ thinking: false });
-        setErrorMsg(`对话生成失败：${e instanceof Error ? e.message : '服务器无响应'}`);
-        setTimeout(() => setErrorMsg(null), 5000);
+        setErrorMsg({
+          type: "generation-failed",
+          detail: e instanceof Error ? e.message : "Server unreachable",
+        });
       }
     },
     [activeChar, scene, convoMap, updateConvo]
@@ -164,13 +179,14 @@ export default function Home() {
       setSleepReport(report);
       setView("sleeplog");
     } else {
-      setErrorMsg("睡眠巩固失败——后端可能没有该角色的记忆数据");
-      setTimeout(() => setErrorMsg(null), 5000);
+      setErrorMsg({ type: "sleep-failed" });
     }
   }, [activeChar]);
 
   const handleRefreshCharacters = useCallback(() => {
-    fetchCharacters().then(setCharacters);
+    fetchCharacters().then(setCharacters).catch(() => {
+      setErrorMsg({ type: "backend-down" });
+    });
   }, []);
 
   if (loading) {
@@ -179,7 +195,7 @@ export default function Home() {
         <div className="main-content" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div className="thinking fadein">
             <span className="pulse"><i /><i /><i /></span>
-            🔮 正在连接记忆引擎…
+            🔮 Connecting to memory engine…
           </div>
         </div>
       </div>
@@ -192,8 +208,8 @@ export default function Home() {
         <div className="main-content" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
           <div className="empty">
             <div className="e-mark">📖</div>
-            <div className="e-title">暂无角色</div>
-            <div className="e-desc">还没有小说被摄入。先导入一部作品吧。</div>
+            <div className="e-title">No characters</div>
+            <div className="e-desc">No novel has been ingested yet. Import some text to get started.</div>
           </div>
         </div>
       </div>
@@ -212,28 +228,17 @@ export default function Home() {
       />
 
       <main className="main-content">
-        {/* ── Error toast ── */}
-        {errorMsg && (
-          <div style={{
-            position: "fixed", top: 16, left: "50%", transform: "translateX(-50%)",
-            background: "#c0392b", color: "#fff", padding: "10px 20px",
-            borderRadius: 8, fontSize: 13, zIndex: 9999,
-            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-            maxWidth: "90%", textAlign: "center",
-          }}>
-            {errorMsg}
-          </div>
-        )}
+        <ErrorToast error={errorMsg} onDismiss={() => setErrorMsg(null)} />
         {/* Nav tabs */}
         <div style={{
           display: "flex", gap: 4, padding: "0 40px", paddingTop: 20,
           borderBottom: "1px solid var(--line)",
         }}>
           {[
-            { id: "conversation", label: "💬 对话" },
-            { id: "profile", label: "🧠 档案" },
-            { id: "sleeplog", label: "💤 巩固日志" },
-            { id: "ingestion", label: "📖 小说" },
+            { id: "conversation", label: "💬 Chat" },
+            { id: "profile", label: "🧠 Profile" },
+            { id: "sleeplog", label: "💤 Sleep Log" },
+            { id: "ingestion", label: "📖 Novel" },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -259,12 +264,13 @@ export default function Home() {
         {view === "conversation" && (
           <ConversationView
             char={activeCharacter}
-            scene={scene ?? { eyebrow: "", text: "", question: `你想问${activeCharacter.name.split(" ")[0]}什么？` }}
+            scene={scene ?? { eyebrow: "", text: "", question: `What would you ask ${activeCharacter.name.split(" ")[0]}?` }}
             options={options}
             convo={convo}
             actions={actions}
             hasContent={!!scene}
             feedbackPreference={feedbackPreference}
+            resumeStatus={resumeStatus}
           />
         )}
         {view === "profile" && (
