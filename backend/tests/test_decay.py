@@ -179,6 +179,8 @@ class TestRecordAccess:
         assert stored is not None
         assert stored["access_count"] == 1
         assert stored["last_accessed_at"] is not None
+        # Importance should have been boosted by 0.01
+        assert stored["importance"] == pytest.approx(0.51, abs=0.001)
 
     def test_record_access_multiple_times(self, fresh_episodic) -> None:
         from app.models.event import NarrativeEvent
@@ -194,6 +196,22 @@ class TestRecordAccess:
             fresh_episodic.record_access(["evt_002"])
         stored = fresh_episodic.get_event("evt_002")
         assert stored["access_count"] == 5
+        assert stored["importance"] == pytest.approx(0.55, abs=0.001)
+
+    def test_record_access_importance_caps_at_1(self, fresh_episodic) -> None:
+        """Importance boost should not exceed 1.0."""
+        from app.models.event import NarrativeEvent
+        ev = NarrativeEvent(
+            id="evt_003", chapter=1, position="1.0",
+            protagonist="Elizabeth", summary="Cap test",
+            importance=0.99, related_entities=[],
+            zwaan_dims={}, embedding=None,
+        )
+        fresh_episodic.add_event(ev)
+        for _ in range(5):
+            fresh_episodic.record_access(["evt_003"])
+        stored = fresh_episodic.get_event("evt_003")
+        assert stored["importance"] == 1.0  # capped, not 1.04
 
     def test_record_access_empty_list_does_nothing(self, fresh_episodic) -> None:
         fresh_episodic.record_access([])  # should not raise

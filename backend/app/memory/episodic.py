@@ -138,11 +138,16 @@ class EpisodicMemory:
         ).fetchone()
         return dict(row) if row else None
 
-    def record_access(self, event_ids: list[str]) -> None:
+    def record_access(
+        self, event_ids: list[str], boost: float = 0.01
+    ) -> None:
         """Increment access_count and update last_accessed_at for given events.
 
-        Called after a successful /ask generation to track which events
-        were retrieved. Non-blocking — runs silently.
+        Also gives a small importance boost (capped at 1.0) to simulate
+        the retrieval-practice effect — events that users keep asking about
+        resist decay because they're clearly relevant.
+
+        Called after a successful /ask generation. Non-blocking.
         """
         if not event_ids:
             return
@@ -153,7 +158,8 @@ class EpisodicMemory:
         self._conn.execute(
             f"UPDATE events SET "
             f"  access_count = access_count + 1, "
-            f"  last_accessed_at = {now_clause} "
+            f"  last_accessed_at = {now_clause}, "
+            f"  importance = MIN(1.0, importance + {boost}) "
             f"WHERE id IN ({ids_str})"
         )
         self._conn.commit()
