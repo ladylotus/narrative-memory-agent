@@ -149,7 +149,7 @@ class GenerationService:
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.8,
-            max_tokens=1024,
+            max_tokens=2048,
             timeout=30,
         )
 
