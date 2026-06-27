@@ -3,6 +3,9 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Use npm mirror for faster install
+RUN npm config set registry https://registry.npmmirror.com
+
 # Install deps (--no-audit --no-fund to avoid slow security audit)
 COPY package.json package-lock.json* ./
 RUN npm install --no-audit --no-fund
