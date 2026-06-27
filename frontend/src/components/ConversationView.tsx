@@ -333,13 +333,17 @@ function Composer({
   shortName: string;
   onSend: (text: string) => void;
 }) {
+  function autoResize(el: HTMLTextAreaElement) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 120) + "px";
+  }
   return (
     <div className="composer-wrap">
       <div className="composer">
         <div className="composer-inner">
           <textarea
-            rows={1}
             placeholder={`💬 Describe a scene, or ask ${shortName} what they would do…`}
+            onInput={(e) => autoResize(e.currentTarget)}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -347,6 +351,7 @@ function Composer({
                 if (el.value.trim()) {
                   onSend(el.value.trim());
                   el.value = "";
+                  el.style.height = "auto";
                 }
               }
             }}
@@ -354,10 +359,11 @@ function Composer({
           <button
             className="send-btn"
             onClick={(e) => {
-              const el = e.currentTarget.parentElement?.querySelector("textarea");
-              if (el && el.value.trim()) {
-                onSend(el.value.trim());
-                el.value = "";
+              const ta = e.currentTarget.parentElement?.querySelector("textarea");
+              if (ta && ta.value.trim()) {
+                onSend(ta.value.trim());
+                ta.value = "";
+                ta.style.height = "auto";
               }
             }}
           >
