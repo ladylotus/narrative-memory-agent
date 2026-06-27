@@ -46,6 +46,20 @@ if %errorlevel% neq 0 (
 
 
 
+where pnpm >nul 2>nul
+
+if %errorlevel% neq 0 (
+
+    echo pnpm not found. Install pnpm first: npm install -g pnpm
+
+    pause
+
+    exit /b 1
+
+)
+
+
+
 set ROOT=%~dp0
 
 
@@ -56,13 +70,13 @@ echo [1/3] Starting backend (FastAPI)...
 
 if exist "%ROOT%backend\.venv\Scripts\uvicorn.exe" (
 
-    start "NMA Backend" cmd /c "title NMA Backend & cd /d %ROOT%backend && .venv\Scripts\uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info"
+    start "NMA Backend" cmd /k "title NMA Backend & cd /d %ROOT%backend && .venv\Scripts\uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info"
 
 ) else (
 
     echo Virtual env not found, trying system Python...
 
-    start "NMA Backend" cmd /c "title NMA Backend & cd /d %ROOT%backend && if exist requirements.txt (pip install -r requirements.txt) else (pip install -e .) 2>nul & .venv\Scripts\uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info"
+    start "NMA Backend" cmd /k "title NMA Backend & cd /d %ROOT%backend && if exist requirements.txt (pip install -r requirements.txt) else (pip install -e .) && uvicorn app.main:app --host 0.0.0.0 --port 8000 --log-level info"
 
 )
 
@@ -76,7 +90,7 @@ timeout /t 3 /nobreak >nul
 
 echo [2/3] Starting frontend (Next.js)...
 
-start "NMA Frontend" cmd /c "title NMA Frontend & cd /d %ROOT%frontend && npm install 2>nul & npm run dev"
+start "NMA Frontend" cmd /k "title NMA Frontend & cd /d %ROOT%frontend && pnpm install && npx next dev"
 
 
 
@@ -107,4 +121,3 @@ echo Close the terminal windows to stop the services.
 echo.
 
 pause
-
