@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { Option, Risk, Scene, Character, ConvoState, Turn } from "@/lib/types";
 
 /* ─── Mark options ─────────────────────────── */
@@ -265,14 +265,62 @@ export default function ConversationView({
 
         {/* Thinking indicator */}
         {convo.thinking && (
-          <div className="thinking fadein">
-            <span className="pulse"><i /><i /><i /></span>
-            🔮 Reading {shortName}'s memory…
-          </div>
+          <ThinkingAnimation shortName={shortName} />
         )}
       </div>
 
       <Composer shortName={shortName} onSend={actions.onSend} />
+    </div>
+  );
+}
+
+/* ─── ThinkingAnimation ─── */
+const THOUGHTS: Record<string, string[]> = {
+  "Elizabeth": [
+    "Elizabeth turns your question over in her mind…",
+    "She recalls the spark in dark eyes at Netherfield…",
+    "A memory of Hertfordshire lanes flickers past…",
+    "She weighs wit against discretion…",
+    "Her fingers trace the spine of a well-read book…",
+    "She looks out the window, composing her thoughts…",
+    "A half-smile forms as she considers her answer…",
+  ],
+  "Darcy": [
+    "Darcy pauses to gather his words…",
+    "He reflects on matters of honour and feeling…",
+    "The memory of a rainy proposal surfaces…",
+    "He straightens his coat, unsettled…",
+    "Pemberley's halls echo in his recollection…",
+    "He wrestles with pride and something softer…",
+    "His gaze steadies as he prepares to speak…",
+  ],
+};
+
+const FALLBACK_THOUGHTS = [
+  "Turning pages of memory…",
+  "Searching for the right words…",
+  "A story unfolds in quiet thought…",
+];
+
+function ThinkingAnimation({ shortName }: { shortName: string }) {
+  const [idx, setIdx] = useState(0);
+  const pool = THOUGHTS[shortName] ?? FALLBACK_THOUGHTS;
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setIdx((p) => (p + 1) % pool.length);
+    }, 2500);
+    return () => clearInterval(timer);
+  }, [pool.length]);
+
+  return (
+    <div className="thinking-anim fadein">
+      <div className="thinking-anim-icon">
+        <span className="ta-quill">✧</span>
+      </div>
+      <div className="thinking-anim-text" key={idx}>
+        {pool[idx]}
+      </div>
     </div>
   );
 }

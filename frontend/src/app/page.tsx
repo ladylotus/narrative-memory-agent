@@ -193,9 +193,13 @@ export default function Home() {
     return (
       <div className="app-shell">
         <div className="main-content" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <div className="thinking fadein">
-            <span className="pulse"><i /><i /><i /></span>
-            🔮 Connecting to memory engine…
+          <div className="thinking-anim fadein">
+            <div className="thinking-anim-icon">
+              <span className="ta-quill">&#x2727;</span>
+            </div>
+            <div className="thinking-anim-text">
+              Unfolding the story…
+            </div>
           </div>
         </div>
       </div>
