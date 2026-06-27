@@ -108,6 +108,12 @@ export async function clearSession(character: string): Promise<void> {
 
 const CHARACTER_META: Record<string, { emoji: string; role: string }> = {
   "Caelan Ashmark": { emoji: "🐺", role: "Protagonist · Alpha" },
+  "Elizabeth Bennet": { emoji: "📖", role: "Protagonist · Pride & Prejudice" },
+  "Fitzwilliam Darcy": { emoji: "🎩", role: "Love Interest · Pride & Prejudice" },
+  "Beta Theron": { emoji: "👤", role: "Character" },
+  "Lena": { emoji: "👤", role: "Character" },
+  "Maren": { emoji: "👤", role: "Character" },
+  "Nell": { emoji: "👤", role: "Character" },
 };
 
 // ── Public API ─────────────────────────────────────────

@@ -32,7 +32,7 @@ export default function Home() {
   const [options, setOptions] = useState<Option[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [sleepReport, setSleepReport] = useState<SleepReport | null>(null);
-  const [feedbackPreference, setFeedbackPreference] = useState("always");
+  const [feedbackPreference, setFeedbackPreference] = useState<"always" | "on-ooc" | "never">("always");
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<ErrorInfo | null>(null);
   const [resumeStatus, setResumeStatus] = useState<{ has_resumed: boolean; turn_count: number; last_question: string } | null>(null);

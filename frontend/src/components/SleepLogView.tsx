@@ -114,7 +114,7 @@ export default function SleepLogView({
                 <span style={{ color: severityColor(c.severity) }}>
                   {c.severity === "high" ? "🔴" : c.severity === "medium" ? "🟡" : "🟢"}
                 </span>
-                {" "}Intent &quot;{c.intent}&quot; conflicts with trait &quot;{c.conflicting_keywords.join(&quot;, &quot;)}&quot;
+                {" "}Intent "{c.intent}" conflicts with trait "{c.conflicting_keywords.join(", ")}"
               </div>
             </div>
           ))}
@@ -138,7 +138,7 @@ export default function SleepLogView({
         <div className="phase">
           <div className="phase-head">
             <span className="phase-num">2</span>
-            <span className="phase-title">🧩 Abstraction &amp; Integration</span>
+            <span className="phase-title">🧩 Abstraction & Integration</span>
           </div>
           <div className="phase-sub">Extract behavior patterns, update character understanding</div>
 
