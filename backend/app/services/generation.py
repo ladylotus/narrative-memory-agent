@@ -149,7 +149,8 @@ class GenerationService:
                 {"role": "user", "content": user_prompt},
             ],
             temperature=0.8,
-            max_tokens=2048,
+            max_tokens=1024,
+            timeout=30,
         )
 
         content = resp.choices[0].message.content or "{}"

@@ -126,7 +126,7 @@ export default function Home() {
           thinking: false,
           turns: [
             ...prev.turns,
-            { text, options: result.options },
+            { text },
           ],
         });
       } catch (e) {
