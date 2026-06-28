@@ -235,32 +235,9 @@ export default function ConversationView({
           />
         )}
 
-        {/* Follow-up turns */}
+        {/* Follow-up turns — history with character responses */}
         {convo.turns.map((t, ti) => (
-          <div key={ti}>
-            <div className="user-turn fadein">
-              <div className="user-bubble">{t.text}</div>
-            </div>
-            {t.options && (
-              <>
-                <div className="turn-label">
-                  🎭 {t.options.length} paths
-                </div>
-                <div className="options">
-                  {t.options.map((opt, i) => (
-                    <OptionCard
-                      key={i}
-                      opt={opt}
-                      i={i}
-                      chosen={null}
-                      anyChosen={false}
-                      onChoose={() => {}}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
+          <TurnHistory key={ti} turn={t} turnIndex={ti} characterName={char.name} />
         ))}
 
         {/* Thinking indicator */}
@@ -324,6 +301,90 @@ function ThinkingAnimation({ shortName }: { shortName: string }) {
     </div>
   );
 }
+
+/* ─── TurnHistory — a single past exchange ─── */
+function TurnHistory({
+  turn,
+  turnIndex,
+  characterName,
+}: {
+  turn: { text: string; options: Option[]; chosen: number | null };
+  turnIndex: number;
+  characterName: string;
+}) {
+  const [showOtherOptions, setShowOtherOptions] = useState(false);
+  const shortName = characterName.split(" ")[0];
+
+  // No saved options — user message only (still loading or initial state)
+  if (!turn.options || turn.options.length === 0) {
+    return (
+      <div className="user-turn fadein">
+        <div className="user-bubble">{turn.text}</div>
+      </div>
+    );
+  }
+
+  const chosenOpt = turn.chosen !== null ? turn.options[turn.chosen] : null;
+  const otherOptions = turn.chosen !== null
+    ? turn.options.filter((_, i) => i !== turn.chosen)
+    : turn.options;
+
+  return (
+    <div className="turn-history-block fadein">
+      {/* User message */}
+      <div className="user-turn">
+        <div className="user-bubble">{turn.text}</div>
+      </div>
+
+      {/* Chosen option card — always visible */}
+      {chosenOpt && (
+        <div className="chosen-option-section">
+          <div className="opt chosen" style={{ pointerEvents: "none", opacity: 1 }}>
+            <div className="opt-head">
+              <span className="opt-idx">{chosenOpt.idx}</span>
+            </div>
+            <div className="opt-title">{chosenOpt.title}</div>
+            <div className="opt-voice">{chosenOpt.voice}</div>
+          </div>
+          {/* Character's actual response */}
+          <div className="char-response">
+            <div className="char-response-name">{shortName}</div>
+            <div className="char-response-text">{chosenOpt.voice}</div>
+          </div>
+        </div>
+      )}
+
+      {/* Toggle for other (unchosen) options */}
+      {otherOptions.length > 1 && (
+        <div className="other-options-section">
+          <button
+            className="toggle-other-btn"
+            onClick={() => setShowOtherOptions(!showOtherOptions)}
+          >
+            {showOtherOptions
+              ? "▾ 收起其他选项"
+              : `▸ 查看其他选项 (${otherOptions.length})`}
+          </button>
+          {showOtherOptions && (
+            <div className="options other-options-list">
+              {otherOptions.map((opt, i) => (
+                <OptionCard
+                  key={i}
+                  opt={opt}
+                  i={i}
+                  chosen={null}
+                  anyChosen={false}
+                  onChoose={() => {}}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 /* ─── Composer ─── */
 function Composer({

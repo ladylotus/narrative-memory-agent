@@ -42,6 +42,7 @@ export interface Scene {
 export interface Turn {
   text: string;
   options: Option[];
+  chosen: number | null;
 }
 
 export interface ConvoState {

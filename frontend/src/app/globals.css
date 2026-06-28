@@ -1346,3 +1346,59 @@ body {
   flex-shrink: 0;
   font-size: 15px;
 }
+
+/* --- Turn History (past exchanges with character response) --- */
+.turn-history-block {
+  margin-bottom: 24px;
+}
+
+.chosen-option-section {
+  margin: 12px 0;
+}
+
+.char-response {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.char-response-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-3);
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.char-response-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--ink);
+  font-style: italic;
+}
+
+.other-options-section {
+  margin-top: 4px;
+}
+
+.toggle-other-btn {
+  background: none;
+  border: none;
+  color: var(--ink-4);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.toggle-other-btn:hover {
+  color: var(--accent);
+}
+
+.other-options-list {
+  margin-top: 8px;
+}

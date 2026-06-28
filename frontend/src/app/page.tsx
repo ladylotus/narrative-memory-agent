@@ -161,7 +161,19 @@ export default function Home() {
         chosenOpt.oocScores,
         convo.marks,
       );
-      updateConvo({ submitted: true });
+
+      // Save this round's options + choice into conversation history
+      const prev = convoMap[activeChar] ?? freshConvo();
+      const updatedTurns = [...prev.turns];
+      if (updatedTurns.length > 0) {
+        const lastIdx = updatedTurns.length - 1;
+        updatedTurns[lastIdx] = {
+          ...updatedTurns[lastIdx],
+          options: options,
+          chosen: convo.chosen,
+        };
+      }
+      updateConvo({ submitted: true, turns: updatedTurns });
     },
     onSend: handleSend,
   };
