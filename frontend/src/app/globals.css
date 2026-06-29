@@ -1410,6 +1410,19 @@ body {
   margin-top: 8px;
 }
 
+
+.char-response-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.char-response-badge {
+  font-size: 11px;
+  color: var(--ink-4);
+  font-weight: 400;
+}
 .char-response-name {
   font-size: 12px;
   font-weight: 600;

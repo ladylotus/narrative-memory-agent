@@ -367,21 +367,14 @@ function TurnHistory({
         <div className="user-bubble">{turn.text}</div>
       </div>
 
-      {/* Chosen option card — always visible */}
+      {/* Character's response bubble — shows voice text directly */}
       {chosenOpt && (
-        <div className="chosen-option-section">
-          <div className="opt chosen" style={{ pointerEvents: "none", opacity: 1 }}>
-            <div className="opt-head">
-              <span className="opt-idx">{chosenOpt.idx}</span>
-            </div>
-            <div className="opt-title">{chosenOpt.title}</div>
-            <div className="opt-voice">{chosenOpt.voice}</div>
+        <div className="char-response">
+          <div className="char-response-head">
+            <span className="char-response-name">{shortName}</span>
+            <span className="char-response-badge">{chosenOpt.tag} · {chosenOpt.risk.pct}%</span>
           </div>
-          {/* Character's actual response */}
-          <div className="char-response">
-            <div className="char-response-name">{shortName}</div>
-            <div className="char-response-text">{chosenOpt.voice}</div>
-          </div>
+          <div className="char-response-text">{chosenOpt.voice}</div>
         </div>
       )}
 
@@ -393,7 +386,7 @@ function TurnHistory({
             onClick={() => setShowOtherOptions(!showOtherOptions)}
           >
             {showOtherOptions
-              ? "▾ 收起其他选项"
+              ? "▾ Hide other options"
               : `▸ 查看其他选项 (${otherOptions.length})`}
           </button>
           {showOtherOptions && (
