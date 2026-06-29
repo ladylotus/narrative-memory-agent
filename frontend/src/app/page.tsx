@@ -113,7 +113,7 @@ export default function Home() {
         : text;
 
       try {
-        const result = await askCharacter(activeChar, fullQuestion, 3);
+        const result = await askCharacter(activeChar, fullQuestion, 4);
         setScene((prev) =>
           prev
             ? { ...prev, text: fullQuestion, question: "What do you do?" }
