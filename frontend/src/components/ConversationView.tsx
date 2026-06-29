@@ -372,7 +372,7 @@ function TurnHistory({
         <div className="char-response">
           <div className="char-response-head">
             <span className="char-response-name">{shortName}</span>
-            <span className="char-response-badge">{chosenOpt.tag} · {chosenOpt.risk.pct}%</span>
+            <span className={`char-response-badge ${chosenOpt.risk.level}`}>{chosenOpt.tag} · {chosenOpt.risk.pct}%</span>
           </div>
           <div className="char-response-text">{chosenOpt.voice}</div>
         </div>
