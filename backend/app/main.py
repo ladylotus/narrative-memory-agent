@@ -2,15 +2,23 @@
 
 from __future__ import annotations
 
-import os
 import sys
 
-# Force UTF-8 mode on Windows — avoids GBK encoding issues with
-# Qwen API responses containing emoji / CJK characters.
-# NOTE: PYTHONUTF8 must be set BEFORE Python starts (via start.bat or env),
-# but PYTHONIOENCODING can be set here as a fallback for subprocesses.
-if sys.platform == "win32":
-    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+# On Windows, Python UTF-8 mode (PYTHONUTF8=1) is REQUIRED because
+# Qwen API responses contain emoji/CJK characters that would cause
+# httpx to hang with a UnicodeEncodeError in the default GBK locale.
+# This is set by run_backend.cmd / start.bat — never set it in Python
+# code (it must be active at interpreter pre-initialization).
+if sys.platform == "win32" and not sys.flags.utf8_mode:
+    sys.exit(
+        "FATAL: Python UTF-8 mode is REQUIRED on Windows.\n\n"
+        "The Qwen API returns emoji/CJK characters that cause httpx\n"
+        "to deadlock under the default GBK locale.\n\n"
+        "Fix: Use start.bat to launch the project, or set the\n"
+        "PYTHONUTF8=1 environment variable before running Python.\n\n"
+        "  cmd:    set PYTHONUTF8=1 && uvicorn app.main:app ...\n"
+        "  bash:   PYTHONUTF8=1 uvicorn app.main:app ...\n"
+    )
 
 import uvicorn
 from fastapi import FastAPI
