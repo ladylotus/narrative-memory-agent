@@ -159,8 +159,10 @@ class ValidationService:
             consistency = (t + b + c) / 3.0
             if risk >= 0.66 and consistency < 0.4:
                 score["details"]["type"] = "violation"
-            elif risk >= 0.66 and p >= 0.6 and consistency >= 0.4:
+            elif p >= 0.55 and consistency >= 0.4:
                 score["details"]["type"] = "surprise"
+            elif risk >= 0.66:
+                score["details"]["type"] = "violation"
             else:
                 score["details"]["type"] = "normal"
 

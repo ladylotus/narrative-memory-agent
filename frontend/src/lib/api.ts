@@ -259,12 +259,10 @@ function mapOption(opt: BOption, idx: number): Option {
     high: "❌ OOC",
   };
 
-  // Override high-risk label based on violation/surprise type
+  // Override label based on violation/surprise type (regardless of risk level)
   let label = labels[level];
-  if (level === "high") {
-    if (oocType === "violation") label = "🚫 OOC Violation";
-    else if (oocType === "surprise") label = "🟠 Surprising";
-  }
+  if (oocType === "violation") label = "🚫 OOC Violation";
+  else if (oocType === "surprise") label = "🟠 Surprising";
 
   // Extract T/B/D/C/P from ooc_details
   const scores: Record<string, number> = {};
