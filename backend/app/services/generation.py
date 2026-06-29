@@ -131,9 +131,11 @@ class GenerationService:
             f"They MUST represent a **spectrum** of directions — for example:\n"
             f"- One that stays closest to your core nature (safe/expected)\n"
             f"- One that explores a less obvious side of you (interesting/surprising)\n"
-            f"- One that is bold or unexpected, pushing the boundary of plausibility\n"
+            f"- One that is surprising yet still authentically you — an unexpected "
+            f"angle, a sharp retort, a hidden depth revealed (surprising but in-character)\n"
             f"- One that clearly violates your core traits — something you would "
-            f"NEVER say or do (out-of-character)\n"
+            f"NEVER say or do, a response that betrays everything you stand for "
+            f"(out-of-character)\n"
             f"\n"
             f"Return ONLY valid JSON in this exact format, no other text:\n"
             f'{{"options": [\n'
