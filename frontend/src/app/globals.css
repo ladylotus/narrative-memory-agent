@@ -290,6 +290,52 @@ body {
   line-height: 1.5;
 }
 
+
+/* --- Arc banner (compact character intro) --- */
+.arc-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  border-radius: var(--r-sm);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.arc-banner-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.arc-banner-text {
+  color: var(--ink-2);
+  line-height: 1.4;
+}
+
+/* --- Convo footer (feedback + composer) --- */
+.convo-footer {
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+}
+
+.convo-footer .feedback {
+  padding: 12px 40px;
+  margin: 0;
+  background: var(--panel);
+}
+
+.convo-footer .composer-wrap {
+  padding: 12px 40px 16px;
+  border-top: none;
+}
+
+/* --- Chosen response (inline after picking option) --- */
+.chosen-response-section {
+  margin: 8px 0 16px;
+}
+
 /* --- Composer --- */
 .composer-wrap {
   padding: 16px 40px 24px;

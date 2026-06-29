@@ -196,33 +196,75 @@ export default function ConversationView({
       )}
 
       <div className="convo">
-        {/* Scene card */}
-        <div className="scene-card">
-          <div className="scene-eyebrow">{scene.eyebrow}</div>
-          <div className="scene-text">{scene.text}</div>
-          <span className="scene-q">{scene.question}</span>
-        </div>
+        {/* Arc banner — compact character intro, replaces the big scene card */}
+        {scene && options.length === 0 && convo.turns.filter(t => t.options).length === 0 && !convo.thinking && (
+          <div className="arc-banner fadein">
+            <span className="arc-banner-icon">{char.emoji}</span>
+            <span className="arc-banner-text">
+              {char.name} · {scene.text}
+            </span>
+          </div>
+        )}
 
-        {/* Turn label */}
-        <div className="turn-label">
-          🎭 {options.length} paths, sorted by likelihood
-        </div>
+        {/* Completed turns — history with character responses */}
+        {convo.turns.filter(t => t.options).map((t, ti) => (
+          <TurnHistory key={ti} turn={t} turnIndex={ti} characterName={char.name} />
+        ))}
 
-        {/* Options */}
-        <div className="options">
-          {options.map((opt, i) => (
-            <OptionCard
-              key={i}
-              opt={opt}
-              i={i}
-              chosen={convo.chosen}
-              anyChosen={anyChosen}
-              onChoose={actions.onChoose}
-            />
-          ))}
-        </div>
+        {/* Current exchange — the last turn without options yet */}
+        {(() => {
+          const lastTurn = convo.turns.length > 0 ? convo.turns[convo.turns.length - 1] : null;
+          if (!lastTurn || lastTurn.options) return null;
 
-        {/* Feedback */}
+          return (
+            <>
+              {/* User message */}
+              <div className="user-turn fadein">
+                <div className="user-bubble">{lastTurn.text}</div>
+              </div>
+
+              {/* Options */}
+              {!convo.thinking && options.length > 0 && (
+                <>
+                  <div className="turn-label">
+                    🎭 {options.length} paths, sorted by likelihood
+                  </div>
+                  <div className="options">
+                    {options.map((opt, i) => (
+                      <OptionCard
+                        key={i}
+                        opt={opt}
+                        i={i}
+                        chosen={convo.chosen}
+                        anyChosen={anyChosen}
+                        onChoose={actions.onChoose}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {/* Chosen option — character response inline */}
+              {convo.chosen !== null && options[convo.chosen] && (
+                <div className="chosen-response-section fadein">
+                  <div className="char-response">
+                    <div className="char-response-name">{shortName}</div>
+                    <div className="char-response-text">{options[convo.chosen].voice}</div>
+                  </div>
+                </div>
+              )}
+            </>
+          );
+        })()}
+
+        {/* Thinking indicator */}
+        {convo.thinking && (
+          <ThinkingAnimation shortName={shortName} />
+        )}
+      </div>
+
+      {/* Footer: feedback + composer */}
+      <div className="convo-footer">
         {showFeedback && (
           <FeedbackBar
             characterName={shortName}
@@ -234,19 +276,8 @@ export default function ConversationView({
             onSubmit={actions.onSubmit}
           />
         )}
-
-        {/* Follow-up turns — history with character responses */}
-        {convo.turns.map((t, ti) => (
-          <TurnHistory key={ti} turn={t} turnIndex={ti} characterName={char.name} />
-        ))}
-
-        {/* Thinking indicator */}
-        {convo.thinking && (
-          <ThinkingAnimation shortName={shortName} />
-        )}
+        <Composer shortName={shortName} onSend={actions.onSend} />
       </div>
-
-      <Composer shortName={shortName} onSend={actions.onSend} />
     </div>
   );
 }
