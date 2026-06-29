@@ -2,6 +2,16 @@
 
 from __future__ import annotations
 
+import os
+import sys
+
+# Force UTF-8 mode on Windows — avoids GBK encoding issues with
+# Qwen API responses containing emoji / CJK characters.
+# NOTE: PYTHONUTF8 must be set BEFORE Python starts (via start.bat or env),
+# but PYTHONIOENCODING can be set here as a fallback for subprocesses.
+if sys.platform == "win32":
+    os.environ.setdefault("PYTHONIOENCODING", "utf-8")
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

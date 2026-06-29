@@ -26,7 +26,11 @@ _client: AsyncOpenAI | None = None
 def _get_client() -> AsyncOpenAI:
     global _client
     if _client is None:
-        _client = AsyncOpenAI(api_key=QWEN_API_KEY, base_url=QWEN_BASE_URL)
+        _client = AsyncOpenAI(
+            api_key=QWEN_API_KEY,
+            base_url=QWEN_BASE_URL,
+            timeout=120.0,
+        )
     return _client
 
 
@@ -112,6 +116,7 @@ class ValidationService:
             messages=[{"role": "user", "content": prompt}],
             temperature=0.3,
             max_tokens=2048,
+            timeout=90,
         )
 
         content = resp.choices[0].message.content or "{}"
@@ -192,6 +197,7 @@ class ValidationService:
                 emb_resp = await client.embeddings.create(
                     model=QWEN_EMBEDDING_MODEL,
                     input=voice,
+                    timeout=30,
                 )
                 embedding = emb_resp.data[0].embedding
             except Exception:

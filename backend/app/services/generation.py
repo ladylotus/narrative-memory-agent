@@ -20,7 +20,11 @@ _client: AsyncOpenAI | None = None
 def _get_client() -> AsyncOpenAI:
     global _client
     if _client is None:
-        _client = AsyncOpenAI(api_key=QWEN_API_KEY, base_url=QWEN_BASE_URL)
+        _client = AsyncOpenAI(
+            api_key=QWEN_API_KEY,
+            base_url=QWEN_BASE_URL,
+            timeout=120.0,
+        )
     return _client
 
 
@@ -150,7 +154,7 @@ class GenerationService:
             ],
             temperature=0.8,
             max_tokens=2048,
-            timeout=30,
+            timeout=90,
         )
 
         content = resp.choices[0].message.content or "{}"

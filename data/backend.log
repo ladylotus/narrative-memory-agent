@@ -1,0 +1,9 @@
+INFO:     Started server process [35964]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+  ✓ Elizabeth Bennet already exists, skipping
+  ✓ Fitzwilliam Darcy already exists, skipping
+  ✓ All demo data already present
+INFO:     127.0.0.1:44913 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2770 - "GET /health HTTP/1.1" 200 OK
