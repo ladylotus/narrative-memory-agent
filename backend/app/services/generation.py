@@ -128,12 +128,12 @@ class GenerationService:
         user_prompt = (
             f"The reader now asks you: \"{question}\"\n\n"
             f"Give me {num_options} different possible responses you might give.\n"
-            f"They should represent **distinctly different directions** you could "
-            f"take — for example:\n"
+            f"They MUST represent a **spectrum** of directions — for example:\n"
             f"- One that stays closest to your core nature (safe/expected)\n"
-            f"- One that explores a less obvious side of you "
-            f"(interesting/surprising)\n"
-            f"- One that is bold or unexpected but still plausibly you\n"
+            f"- One that explores a less obvious side of you (interesting/surprising)\n"
+            f"- One that is bold or unexpected, pushing the boundary of plausibility\n"
+            f"- One that clearly violates your core traits — something you would "
+            f"NEVER say or do (out-of-character)\n"
             f"\n"
             f"Return ONLY valid JSON in this exact format, no other text:\n"
             f'{{"options": [\n'
