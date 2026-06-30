@@ -1,36 +1,44 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NMA Frontend
 
-## Getting Started
+Next.js 16 (TypeScript) UI for the Narrative Memory Agent.
 
-First, run the development server:
+## Stack
+
+- **Framework:** Next.js 16.2.6 (TypeScript)
+- **Build:** Standalone output for Docker
+- **UI:** Custom CSS (dark theme, CSS variables)
+
+## Quick Start
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Requires the backend running on `http://localhost:8000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+pages/
+├── page.tsx          # Main app shell — character selection, routing, state
+├── components/
+│   ├── Sidebar       # Character list + nav
+│   ├── ConversationView  # Chat UI: options, feedback, history
+│   ├── ProfileView   # Character cognitive profile display
+│   ├── SleepLogView  # Sleep consolidation report
+│   ├── IngestionView # Novel text import
+│   ├── SettingsView  # User preferences
+│   └── ErrorToast    # Unified error handling
+└── lib/
+    ├── api.ts        # Backend API adapter
+    ├── data.ts       # Demo character data
+    └── types.ts      # Shared TypeScript types
+```
 
-## Learn More
+## Key Concepts
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **ConversationView** renders the chat interface with option cards, risk badges (low/medium/high), character response bubbles, and a feedback bar for GenBias learning.
+- **WorkingMemory** is managed on the backend — the frontend tracks turn history in a `convoMap` and submits user choices as feedback.
+- **Cross-session memory** is surfaced via a resumption banner when returning to a previously-used character.

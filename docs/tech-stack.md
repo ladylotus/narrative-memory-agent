@@ -19,7 +19,7 @@
 
 ## Testing
 - **Framework:** pytest 9.0 + pytest-asyncio
-- **Coverage:** 93 unit tests (bias, decay, validation, bias_prompt, API, sleep)
+- **Coverage:** 94 unit tests (bias, decay, validation, bias_prompt, API, sleep)
 
 ## Deployment
 - **Containerization:** Docker (multi-stage builds)

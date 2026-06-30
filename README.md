@@ -7,9 +7,11 @@
 
 ## 📖 What is NMA?
 
-NMA gives fictional characters **persistent memory**. It reads novel text, builds a cognitive profile for each character, and lets authors ask "what would this character do?" — generating responses in that character's authentic voice, validated against their established personality.
+NMA gives fictional characters **persistent memory**. It reads novel text, builds a cognitive profile for each character, and lets you ask "what would this character do?" — generating responses in that character's authentic voice, validated against their established personality.
 
 Unlike generic chatbots or writing assistants, NMA treats each character as a unique cognitive entity with evolving traits, behavioral patterns, a relationship network, and a remembered conversation history across sessions.
+
+The system works with **any fiction** — pre-loaded demo data includes characters from two novels (Jane Austen's *Pride and Prejudice* and the original Caelvorn Series) to show it handles both canonical literary figures and original creations equally well.
 
 ---
 
@@ -98,13 +100,15 @@ npm run dev
 
 ## 🎬 Demo Flow (2-3 minutes)
 
-1. Open the app → Elizabeth Bennet is pre-loaded
-2. Ask Elizabeth about Darcy's proposal → see 4 options with OOC risk scores
-3. Pick a fitting response → feedback is saved to memory
-4. View Elizabeth's cognitive profile (traits, relationships, behavior patterns)
-5. Run Sleep Consolidation → see how NMA abstracts events into traits
+1. Open the app → pick a character: **Elizabeth Bennet** or **Lena** (from 4 pre-loaded options)
+2. Ask Elizabeth about Darcy's proposal → see 4 options with OOC risk scores and type labels (normal / surprise / violation)
+3. Pick a response → feedback is saved to GenBias memory
+4. Follow up with a question → the character remembers the previous exchange via WorkingMemory
+5. Switch to Lena (an original character) → ask her about the Alpha's gaze → see the same system handle a character Qwen has never read before
+6. View any character's cognitive profile (traits, behavior patterns, relationships)
+7. Run Sleep Consolidation → see how NMA abstracts events into traits
 
-Full demo script in `docs/demo-questions.md`.
+Full demo script in `docs/demo-script-v2.md`.
 
 ---
 
@@ -159,8 +163,8 @@ narrative-memory-agent/
 │   │   ├── api/           # FastAPI route handlers
 │   │   ├── memory/        # 3-layer memory (working/episodic/vectors)
 │   │   ├── models/        # Data models (Pydantic + dataclasses)
-│   ├── services/      # Core services (generation/validation/bias/decay/sleep)
-│   └── tests/             # 93 unit tests
+│   │   └── services/      # Core services (generation/validation/bias/decay/sleep)
+│   └── tests/             # 94 unit tests
 ├── frontend/
 │   └── src/
 │       ├── app/           # Next.js pages
@@ -169,7 +173,8 @@ narrative-memory-agent/
 ├── docs/
 │   ├── architecture.en.html  # Interactive architecture diagram (English)
 │   ├── architecture.zh.html  # Interactive architecture diagram (Chinese)
-│   └── demo-questions.md     # Demo script
+│   ├── demo-script-v2.md     # Demo video script (3 min, multi-novel)
+│   └── project-description.md # Devpost submission description
 ├── Dockerfile.backend
 ├── Dockerfile.frontend
 ├── docker-compose.yml
