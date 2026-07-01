@@ -207,14 +207,14 @@ export default function ConversationView({
         )}
 
         {/* Completed turns — history with character responses */}
-        {convo.turns.filter(t => t.options).map((t, ti) => (
+        {convo.turns.filter(t => t.options && t.options.length > 0).map((t, ti) => (
           <TurnHistory key={ti} turn={t} turnIndex={ti} characterName={char.name} />
         ))}
 
         {/* Current exchange — the last turn without options yet */}
         {(() => {
           const lastTurn = convo.turns.length > 0 ? convo.turns[convo.turns.length - 1] : null;
-          if (!lastTurn || lastTurn.options) return null;
+          if (!lastTurn || (lastTurn.options && lastTurn.options.length > 0)) return null;
 
           return (
             <>
