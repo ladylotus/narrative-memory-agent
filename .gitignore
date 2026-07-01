@@ -41,3 +41,9 @@ chroma_db/
 
 # Diagrams (local copies)
 diagrams/
+
+# Internal docs, audio, novel, design inspiration
+internal/
+
+# Runtime data (ChromaDB, logs)
+data/
