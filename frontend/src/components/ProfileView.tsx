@@ -14,9 +14,11 @@ function TraitBar({ pct }: { pct: number }) {
 export default function ProfileView({
   char,
   profile,
+  onDelete,
 }: {
   char: Character;
   profile?: CharacterProfile;
+  onDelete?: (name: string) => void;
 }) {
   if (!profile) {
     return (
@@ -127,6 +129,28 @@ export default function ProfileView({
             </div>
           </div>
         ))}
+
+        {/* Delete */}
+        {onDelete && (
+          <div style={{ marginTop: 24, paddingTop: 16, borderTop: "1px solid var(--line)" }}>
+            <button
+              style={{
+                background: "none",
+                border: "1px solid rgba(255,80,80,0.3)",
+                color: "#ff5050",
+                padding: "6px 14px",
+                borderRadius: 6,
+                fontSize: 12,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                opacity: 0.7,
+              }}
+              onClick={() => onDelete(char.name)}
+            >
+              🗑 Delete {char.name}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

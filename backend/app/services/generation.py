@@ -124,18 +124,30 @@ class GenerationService:
                     f"{chr(10).join(memory_parts)}\n"
                 )
 
+        # ── Sleep report: metacognition injection ──────────────
+        sleep_report = profile.get("last_sleep_report", "")
+        if sleep_report:
+            system_prompt += (
+                f"\n"
+                f"---\n"
+                f"Something you've realised about yourself recently:\n"
+                f"{sleep_report}\n"
+                f"---\n"
+            )
+
         # ── User prompt ─────────────────────────────────────────
         user_prompt = (
             f"The reader now asks you: \"{question}\"\n\n"
             f"Give me {num_options} different possible responses you might give.\n"
-            f"They MUST represent a **spectrum** of directions — for example:\n"
+            f"They MUST represent a **spectrum** of directions:\n"
             f"- One that stays closest to your core nature (safe/expected)\n"
             f"- One that explores a less obvious side of you (interesting/surprising)\n"
-            f"- One that is surprising yet still authentically you — an unexpected "
-            f"angle, a sharp retort, a hidden depth revealed (surprising but in-character)\n"
+            f"- AT LEAST one that is **genuinely surprising** — an unexpected angle, "
+            f"a hidden depth revealed, a response that makes the reader think "
+            f"\"I didn't expect that, but it makes sense.\" This must be the most "
+            f"creative/inventive option, not just a slight variation of the safe one.\n"
             f"- One that clearly violates your core traits — something you would "
-            f"NEVER say or do, a response that betrays everything you stand for "
-            f"(out-of-character)\n"
+            f"NEVER say or do (out-of-character)\n"
             f"\n"
             f"Return ONLY valid JSON in this exact format, no other text:\n"
             f'{{"options": [\n'
@@ -148,19 +160,38 @@ class GenerationService:
         )
 
         client = _get_client()
-        resp = await client.chat.completions.create(
-            model=QWEN_MODEL,
-            messages=[
+
+        # Try with response_format first (JSON mode), fall back to plain if not supported
+        kwargs: dict[str, Any] = {
+            "model": QWEN_MODEL,
+            "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
             ],
-            temperature=0.8,
-            max_tokens=2048,
-            timeout=90,
-        )
+            "temperature": 0.9,
+            "max_tokens": 2048,
+            "timeout": 90,
+        }
 
-        content = resp.choices[0].message.content or "{}"
-        return self._parse_options(content)
+        for attempt in range(2):
+            try:
+                if attempt == 0:
+                    kwargs["response_format"] = {"type": "json_object"}
+                resp = await client.chat.completions.create(**kwargs)
+                content = resp.choices[0].message.content or "{}"
+                parsed = self._parse_options(content)
+                if parsed and len(parsed) >= 2:
+                    return parsed
+                # Fall through to retry on next attempt
+            except Exception:
+                if attempt == 0:
+                    # Remove response_format and retry
+                    kwargs.pop("response_format", None)
+                    continue
+                raise
+
+        # Final fallback
+        return _fallback_options(content)
 
     # ── helpers ────────────────────────────────
 

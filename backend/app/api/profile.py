@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
-from app.database import get_character, list_characters
+from app.database import delete_character, get_character, list_characters
 
 router = APIRouter()
 
@@ -40,6 +40,18 @@ async def get_profile_summary(character_name: str):
         "core_traits": [t["name"] for t in traits if t.get("category") == "core"],
         "arc_stage": profile.get("arc_stage", "unknown"),
     }
+
+
+@router.delete("/{character_name}")
+async def delete_character_endpoint(character_name: str):
+    """Delete a character and all associated data."""
+    exists = get_character(character_name)
+    if exists is None:
+        raise HTTPException(status_code=404, detail=f"Character '{character_name}' not found")
+    deleted = delete_character(character_name)
+    if not deleted:
+        raise HTTPException(status_code=500, detail="Failed to delete character")
+    return {"status": "ok", "deleted": character_name}
 
 
 @router.get("/")

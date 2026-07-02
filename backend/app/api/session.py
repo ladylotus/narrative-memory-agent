@@ -30,6 +30,7 @@ class ResumeResponse(BaseModel):
     has_resumed: bool = False
     turn_count: int = 0
     last_question: str = ""
+    conversation_history: list[dict] = []  # list of {text, options, chosen}
     preferred_profile: list[float] | None = None
 
 
@@ -71,11 +72,15 @@ async def resume_session(character: str):
         preferred = state["preferred_profile"]
 
     turns = state.get("turns", [])
+    conv_hist = state.get("conversation_history", [])
+    if not isinstance(conv_hist, list):
+        conv_hist = []
     return ResumeResponse(
         character=character,
         has_resumed=True,
         turn_count=len(turns) if isinstance(turns, list) else 0,
         last_question=state.get("last_question", ""),
+        conversation_history=conv_hist,
         preferred_profile=preferred,
     )
 

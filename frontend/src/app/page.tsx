@@ -18,6 +18,7 @@ import {
   fetchResumeStatus,
   checkpointSession,
   clearSession,
+  deleteCharacter,
 } from "@/lib/api";
 import { NMA_NOVEL, freshConvo } from "@/lib/data";
 import type { Character, Option, ConvoState, Scene } from "@/lib/types";
@@ -32,6 +33,7 @@ export default function Home() {
   const [options, setOptions] = useState<Option[]>([]);
   const [profile, setProfile] = useState<any>(null);
   const [sleepReport, setSleepReport] = useState<SleepReport | null>(null);
+  const [isSleeping, setIsSleeping] = useState(false);
   const [feedbackPreference, setFeedbackPreference] = useState<"always" | "on-ooc" | "never">("always");
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<ErrorInfo | null>(null);
@@ -80,6 +82,45 @@ export default function Home() {
     fetchResumeStatus(activeChar).then((r) => {
       if (r.has_resumed) {
         setResumeStatus({ has_resumed: true, turn_count: r.turn_count, last_question: r.last_question });
+        // Restore conversation history into convoMap
+        if (r.conversation_history && r.conversation_history.length > 0) {
+          const restoredTurns = r.conversation_history.map((entry: any) => {
+            const options = (entry.options || []).map((opt: any, i: number) => {
+              const level = opt.level || "low";
+              const labels: Record<string, string> = {
+                low: "✅ Fitting",
+                med: "⚠️ Off-track",
+                high: "❌ OOC",
+              };
+              let label = labels[level] || "✅ Fitting";
+              const oocType = opt.type || "normal";
+              if (oocType === "violation") label = "🚫 OOC Violation";
+              else if (oocType === "surprise") label = "🟠 Surprising";
+              const scores: Record<string, number> = {};
+              for (const k of ["T", "B", "D", "C", "P"]) {
+                scores[k] = typeof opt[k] === "number" ? opt[k] : 0.5;
+              }
+              return {
+                idx: `Direction ${String(i + 1).padStart(2, "0")}`,
+                title: opt.description || "",
+                voice: opt.voice || "",
+                tag: opt.tag || label,
+                tagNew: false,
+                risk: { level, label, pct: opt.pct || 0, type: oocType },
+                oocScores: scores,
+              };
+            });
+            return {
+              text: entry.text || "",
+              options,
+              chosen: entry.chosen,
+            };
+          });
+          setConvoMap((prev) => ({
+            ...prev,
+            [activeChar]: { ...(prev[activeChar] ?? freshConvo()), turns: restoredTurns },
+          }));
+        }
       } else {
         setResumeStatus(null);
       }
@@ -124,9 +165,11 @@ export default function Home() {
         const prev = convoMap[activeChar] ?? freshConvo();
         updateConvo({
           thinking: false,
+          chosen: null,
+          submitted: false,
           turns: [
             ...prev.turns,
-            { text },
+            { text, options: [], chosen: null },
           ],
         });
       } catch (e) {
@@ -185,8 +228,10 @@ export default function Home() {
 
   const handleRunSleep = useCallback(async () => {
     if (!activeChar) return;
+    setIsSleeping(true);
     setSleepReport(null);
     const report = await triggerSleep(activeChar);
+    setIsSleeping(false);
     if (report) {
       setSleepReport(report);
       setView("sleeplog");
@@ -200,6 +245,29 @@ export default function Home() {
       setErrorMsg({ type: "backend-down" });
     });
   }, []);
+
+  const handleDeleteCharacter = useCallback(async (name: string) => {
+    if (!confirm(`Delete "${name}" and all associated data? This cannot be undone.`)) return;
+    try {
+      await deleteCharacter(name);
+      // Remove from local state
+      const remaining = characters.filter((c) => c.id !== name);
+      setCharacters(remaining);
+      // Switch to the first remaining character if we deleted the active one
+      if (activeChar === name && remaining.length > 0) {
+        setActiveChar(remaining[0].id);
+        setView("conversation");
+      } else if (remaining.length === 0) {
+        setActiveChar("");
+      }
+      setErrorMsg(null);
+    } catch (e) {
+      setErrorMsg({
+        type: "generic",
+        detail: e instanceof Error ? e.message : "Failed to delete character",
+      });
+    }
+  }, [characters, activeChar]);
 
   if (loading) {
     return (
@@ -290,12 +358,13 @@ export default function Home() {
           />
         )}
         {view === "profile" && (
-          <ProfileView char={activeCharacter} profile={profile ?? undefined} />
+          <ProfileView char={activeCharacter} profile={profile ?? undefined} onDelete={handleDeleteCharacter} />
         )}
         {view === "sleeplog" && (
           <SleepLogView
             char={activeCharacter}
             report={sleepReport}
+            isSleeping={isSleeping}
             onRunSleep={handleRunSleep}
           />
         )}
@@ -307,6 +376,7 @@ export default function Home() {
             novel={NMA_NOVEL}
             feedbackPreference={feedbackPreference}
             onChangeFeedbackPreference={setFeedbackPreference}
+            onNavigate={setView}
           />
         )}
       </main>

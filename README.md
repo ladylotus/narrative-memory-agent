@@ -108,7 +108,6 @@ npm run dev
 6. View any character's cognitive profile (traits, behavior patterns, relationships)
 7. Run Sleep Consolidation → see how NMA abstracts events into traits
 
-Full demo script in `docs/demo-script-v2.md`.
 
 ---
 
@@ -164,7 +163,7 @@ narrative-memory-agent/
 │   │   ├── memory/        # 3-layer memory (working/episodic/vectors)
 │   │   ├── models/        # Data models (Pydantic + dataclasses)
 │   │   └── services/      # Core services (generation/validation/bias/decay/sleep)
-│   └── tests/             # 94 unit tests
+│   └── tests/             # 124 unit tests
 ├── frontend/
 │   └── src/
 │       ├── app/           # Next.js pages
@@ -173,8 +172,8 @@ narrative-memory-agent/
 ├── docs/
 │   ├── architecture.en.html  # Interactive architecture diagram (English)
 │   ├── architecture.zh.html  # Interactive architecture diagram (Chinese)
-│   ├── demo-script-v2.md     # Demo video script (3 min, multi-novel)
-│   └── project-description.md # Devpost submission description
+│   ├── project-description.md # Devpost submission description
+│   └── tech-stack.md         # Technology stack overview
 ├── Dockerfile.backend
 ├── Dockerfile.frontend
 ├── docker-compose.yml

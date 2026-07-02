@@ -94,7 +94,7 @@ function FeedbackBar({
               className={`fb-mark${sel ? " sel" : ""}`}
               onClick={() => onToggleMark(o.value)}
             >
-              {sel ? "☑" : "□"} {o.label}
+              {sel ? "☑" : "□"} {o.icon} {o.label}
             </button>
           );
         })}
@@ -169,7 +169,7 @@ export default function ConversationView({
         {resumeStatus?.has_resumed && (
           <div className="resume-banner fadein">
             🔁 Welcome back — {resumeStatus.turn_count} previous exchanges remembered.
-            {resumeStatus.last_question && <> Last topic: <em>"{resumeStatus.last_question.slice(0, 80)}"</em></>}
+            {resumeStatus.last_question && <> Last question: <em>"{resumeStatus.last_question}"</em></>}
           </div>
         )}
         <div className="empty">
@@ -191,7 +191,7 @@ export default function ConversationView({
       {resumeStatus?.has_resumed && (
         <div className="resume-banner fadein">
           🔁 Welcome back — {resumeStatus.turn_count} previous exchanges remembered.
-          {resumeStatus.last_question && <> Last topic: <em>"{resumeStatus.last_question.slice(0, 80)}"</em></>}
+          {resumeStatus.last_question && <> Last question: <em>"{resumeStatus.last_question}"</em></>}
         </div>
       )}
 
@@ -302,6 +302,24 @@ const THOUGHTS: Record<string, string[]> = {
     "He wrestles with pride and something softer…",
     "His gaze steadies as he prepares to speak…",
   ],
+  "Caelan": [
+    "Caelan leans back, fingers drumming on the table…",
+    "He studies the ceiling as if reading answers in the cracks…",
+    "A dry smile flickers — he found something amusing…",
+    "He turns a pen over in his hand, thinking…",
+    "The air around him stills when he's focused…",
+    "He mutters something under his breath, then nods…",
+    "Caelan taps the table once — decision made.",
+  ],
+  "Lena": [
+    "Lena tilts her head, eyes narrowing thoughtfully…",
+    "She traces an invisible line on the table…",
+    "A faint hum escapes her as she considers…",
+    "She pulls a stray thread from her sleeve, buying time…",
+    "Her gaze goes distant — she's somewhere else for a second…",
+    "She rolls her shoulders, then leans in…",
+    "Lena's lips press into a thin line, then part.",
+  ],
 };
 
 const FALLBACK_THOUGHTS = [
@@ -387,7 +405,7 @@ function TurnHistory({
           >
             {showOtherOptions
               ? "▾ Hide other options"
-              : `▸ 查看其他选项 (${otherOptions.length})`}
+              : `▸ Show other options (${otherOptions.length})`}
           </button>
           {showOtherOptions && (
             <div className="options other-options-list">

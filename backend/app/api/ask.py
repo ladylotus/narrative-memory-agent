@@ -4,10 +4,13 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException
 
+import uuid
+
 from app.database import get_character
 from app.models import AskRequest, AskResponse, Option
 from app.memory.episodic import EpisodicMemory
 from app.memory.working import WorkingMemory
+from app.models.event import NarrativeEvent
 from app.services.decay import select_context
 from app.services.generation import GenerationService
 from app.services.session_resumption import (
@@ -139,8 +142,29 @@ async def ask_character(body: AskRequest):
                 },
             ))
 
+
         # Record user question in working memory
         wm.add(role="user", content=body.question)
+
+        # ── Write user ask to EpisodicMemory (feedback loop) ──
+        try:
+            current_chapter = episodic.get_max_chapter(body.character) or 0
+            episodic.add_event(NarrativeEvent(
+                id=f"user_ask_{body.character}_{uuid.uuid4().hex[:12]}",
+                chapter=current_chapter,
+                position="user",
+                protagonist=body.character,
+                summary=f"User asked: {body.question[:200]}",
+                importance=0.6,
+                zwaan_dims={
+                    "time": str(current_chapter + 1),
+                    "protagonist": body.character,
+                    "causality": "user asked character",
+                    "intent": "seeking character insight",
+                },
+            ))
+        except Exception:
+            pass  # non-blocking — don't break the ask flow
 
         # Record episodic access count for recalled events
         episodic.record_access(recalled_ids)
@@ -151,10 +175,31 @@ async def ask_character(body: AskRequest):
         preferred = None
         if char_data:
             preferred = char_data.get("preferred_profile")
+        # Save options as JSON for later conversation_history reconstruction
+        options_for_storage = []
+        for opt in merged:
+            od = opt.ooc_details or {}
+            options_for_storage.append({
+                "label": opt.label,
+                "description": opt.description or "",
+                "voice": od.get("text", ""),
+                "tag": od.get("tag", ""),
+                "level": od.get("level", "low"),
+                "pct": round(opt.ooc_risk * 100) if opt.ooc_risk else 0,
+                "T": od.get("T"),
+                "B": od.get("B"),
+                "D": od.get("D"),
+                "C": od.get("C"),
+                "P": od.get("P"),
+                "type": od.get("type", "normal"),
+                "reason": od.get("reason", ""),
+                "ooc_risk": opt.ooc_risk,
+            })
         save_session_state(
             character=body.character,
             working_memory=wm,
             question=body.question,
+            options_json=options_for_storage,
             preferred_profile=preferred,
         )
 

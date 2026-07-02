@@ -39,7 +39,7 @@
 | **文档更新** | ✅ |
 | ├ README.md — Features 加 Memory Decay + Episodic Memory Injection | ✅ |
 | ├ docs/tech-stack.md — 加 Decay Service | ✅ |
-| └ docs/user-test-flow.md — 加情景记忆验证点 + 测试数更新 | ✅ |
+| └ internal/user-test-flow.md — 加情景记忆验证点 + 测试数更新 | ✅ |
 
 ---
 
@@ -50,7 +50,7 @@
 | □ Project Description（英文 ≤500词） | 初稿已写 → 你 review 改 | 无 |
 | □ README 完善（截图/GIF + 快速开始 + 架构） | 初稿已写 → 你 review 改 + 截图 | 需跑起来截图 |
 | □ 阿里云部署证明 | 后端部署到阿里云 + 录 <30s 证明视频 | 需一台阿里云 ECS |
-| □ Demo 视频 ~3分钟 | 按 docs/user-test-flow.md 录制 + 剪辑 | 需脚本已就绪 |
+| □ Demo 视频 ~3分钟 | 按 internal/user-test-flow.md 录制 + 剪辑 | 需脚本已就绪 |
 
 ## P1 — 提交冲刺
 

@@ -6,10 +6,12 @@ import type { SleepReport } from "@/lib/sleep-types";
 export default function SleepLogView({
   char,
   report,
+  isSleeping,
   onRunSleep,
 }: {
   char: Character;
   report: SleepReport | null;
+  isSleeping: boolean;
   onRunSleep: () => void;
 }) {
   const shortName = char.name.split(" ")[0];
@@ -26,6 +28,17 @@ export default function SleepLogView({
             </div>
           </div>
           <div className="empty" style={{ marginTop: 40 }}>
+            {isSleeping ? (
+              <>
+                <div className="e-mark spinning">💤</div>
+                <div className="e-title">Running sleep consolidation…</div>
+                <div className="e-desc">
+                  {shortName} is replaying recent events, detecting patterns, and consolidating memory.
+                  This may take a moment.
+                </div>
+              </>
+            ) : (
+              <>
             <div className="e-mark">💤</div>
             <div className="e-title">No consolidation records yet</div>
             <div className="e-desc">
@@ -37,6 +50,8 @@ export default function SleepLogView({
                 🌙 Run Sleep Consolidation
               </button>
             </div>
+            </>
+            )}
           </div>
         </div>
       </div>
@@ -187,8 +202,8 @@ export default function SleepLogView({
 
         {/* Run again */}
         <div className="row-actions" style={{ marginTop: 24 }}>
-          <button className="btn primary" onClick={onRunSleep}>
-            🌙 Run Again
+          <button className="btn primary" onClick={onRunSleep} disabled={isSleeping}>
+            {isSleeping ? "💤 Consolidating…" : "🌙 Run Again"}
           </button>
         </div>
       </div>

@@ -32,6 +32,7 @@ def save_session_state(
     working_memory: WorkingMemory | None = None,
     question: str | None = None,
     options_json: list[dict[str, Any]] | None = None,
+    conversation_history: list[dict[str, Any]] | None = None,
     preferred_profile: list[float] | None = None,
 ) -> None:
     """Serialize working memory → SQLite for cross-session persistence.
@@ -52,6 +53,8 @@ def save_session_state(
     }
     if options_json is not None:
         data["last_options"] = options_json
+    if conversation_history is not None:
+        data["conversation_history"] = conversation_history
     if preferred_profile is not None:
         data["preferred_profile"] = preferred_profile
 

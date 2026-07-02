@@ -12,10 +12,12 @@ export default function SettingsView({
   novel,
   feedbackPreference,
   onChangeFeedbackPreference,
+  onNavigate,
 }: {
   novel: Novel;
   feedbackPreference: "always" | "on-ooc" | "never";
   onChangeFeedbackPreference: (v: "always" | "on-ooc" | "never") => void;
+  onNavigate?: (view: string) => void;
 }) {
   return (
     <div className="scroll">
@@ -44,14 +46,14 @@ export default function SettingsView({
               <span className="sl-name">📤 Import New Text</span>
               <span className="sl-desc">Upload a .txt file or paste chapter content</span>
             </div>
-            <button className="btn primary">Import</button>
+            <button className="btn primary" onClick={() => onNavigate?.("ingestion")}>Import</button>
           </div>
 
           {/* Model */}
           <div className="settings-row">
             <div className="settings-label">
               <span className="sl-name">🤖 Model</span>
-              <span className="sl-desc">qwen3.6-plus · 1M tokens remaining</span>
+              <span className="sl-desc">Qwen model · 1M tokens remaining</span>
             </div>
           </div>
 

@@ -603,25 +603,25 @@ class SleepService:
         p1 = report.phase1
         p2 = report.phase2
 
-        parts.append(f"📊 分析了 {p1['events_analyzed']} 个事件")
+        parts.append(f"📊 Analyzed {p1['events_analyzed']} events")
         if p1["conflicts_detected"]:
-            parts.append(f"⚡ 发现 {len(p1['conflicts_detected'])} 处行为冲突")
+            parts.append(f"⚡ Found {len(p1['conflicts_detected'])} behavioral conflict(s)")
         else:
-            parts.append("✅ 未发现行为冲突")
+            parts.append("✅ No behavioral conflicts detected")
         if p1["importance_adjustments"]:
-            parts.append(f"🔺 调整了 {len(p1['importance_adjustments'])} 个关键事件的权重")
+            parts.append(f"🔺 Adjusted importance for {len(p1['importance_adjustments'])} key event(s)")
         if p1.get("events_archived", 0):
-            parts.append(f"📦 归档了 {p1['events_archived']} 个事件（过时记忆）")
+            parts.append(f"📦 Archived {p1['events_archived']} outdated memory event(s)")
         if p2["patterns_extracted"]:
-            parts.append(f"🧩 提取了 {len(p2['patterns_extracted'])} 个行为模式")
+            parts.append(f"🧩 Extracted {len(p2['patterns_extracted'])} behavioral pattern(s)")
         if p2["events_pruned"]:
-            parts.append(f"✂️ 剪枝了 {p2['events_pruned']} 个冗余事件")
+            parts.append(f"✂️ Pruned {p2['events_pruned']} redundant event(s)")
         if p2["events_tagged"]:
-            parts.append(f"🏷️ 标注了 {p2['events_tagged']} 个事件的情感标签")
+            parts.append(f"🏷️ Tagged {p2['events_tagged']} event(s) with emotional labels")
         if p2["arc_stage_change"]:
-            parts.append(f"🔄 角色弧光: {p2['arc_stage_change']['from']} → {p2['arc_stage_change']['to']}")
+            parts.append(f"🔄 Arc evolution: {p2['arc_stage_change']['from']} → {p2['arc_stage_change']['to']}")
         if p2["trait_updates"]:
-            parts.append(f"📉 {len(p2['trait_updates'])} 个特质置信度下调")
+            parts.append(f"📉 {len(p2['trait_updates'])} trait confidence downgraded")
         report.phase3["summary"] = " | ".join(parts)
 
         delta = len(p2.get("trait_updates", [])) * -0.03

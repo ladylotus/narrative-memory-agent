@@ -71,7 +71,7 @@ export default function Sidebar({
 
       {/* Footer actions */}
       <div className="side-foot">
-        <button className="side-action" onClick={() => onNav("settings")}>
+        <button className="side-action" onClick={() => onNav("ingestion")}>
           📤 Import Text
         </button>
         <button

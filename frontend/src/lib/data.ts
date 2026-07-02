@@ -9,11 +9,11 @@ import type {
 } from "./types";
 
 export const NMA_NOVEL: Novel = {
-  title: "Pride and Prejudice",
-  author: "Jane Austen",
-  year: 1813,
-  chapters: 61,
-  emoji: "📖",
+  title: "Memory Agent Demo",
+  author: "Multi-Novel",
+  year: 2025,
+  chapters: 1,
+  emoji: "🧠",
 };
 
 export const NMA_CHARACTERS: Character[] = [

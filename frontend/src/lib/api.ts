@@ -73,12 +73,13 @@ export interface ResumeStatus {
   has_resumed: boolean;
   turn_count: number;
   last_question: string;
+  conversation_history: any[];
   preferred_profile: number[] | null;
 }
 
 export async function fetchResumeStatus(character: string): Promise<ResumeStatus> {
   const res = await fetch(`${API}/session/resume/${encodeURIComponent(character)}`);
-  if (!res.ok) return { character, has_resumed: false, turn_count: 0, last_question: "", preferred_profile: null };
+  if (!res.ok) return { character, has_resumed: false, turn_count: 0, last_question: "", conversation_history: [], preferred_profile: null };
   return res.json();
 }
 
@@ -160,6 +161,17 @@ export async function fetchCharacters(): Promise<Character[]> {
       status: "consolidated" as const,
     };
   });
+}
+
+/** Delete a character from the backend. */
+export async function deleteCharacter(name: string): Promise<void> {
+  const res = await fetch(`${API}/profile/${encodeURIComponent(name)}`, {
+    method: "DELETE",
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err || `HTTP ${res.status}`);
+  }
 }
 
 /** Ask the character a question. Returns frontend-ready options. */

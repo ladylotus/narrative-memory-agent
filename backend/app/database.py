@@ -49,12 +49,26 @@ def _init_db(conn: sqlite3.Connection) -> None:
             turns       TEXT NOT NULL DEFAULT '[]',   -- JSON list of {role, content}
             last_question TEXT NOT NULL DEFAULT '',
             last_options TEXT,                         -- JSON list of Option dicts
+            conversation_history TEXT DEFAULT '[]',    -- JSON list of {text, options, chosen}
             preferred_profile TEXT,                    -- JSON [T,B,D,C,P]
             created_at  TEXT DEFAULT (datetime('now')),
             updated_at  TEXT DEFAULT (datetime('now'))
         );
+
+        -- Migration: add conversation_history column for existing DBs
+        SELECT CASE
+            WHEN COUNT(*) = 0 THEN 1
+            ELSE 0
+        END FROM pragma_table_info('session_state') WHERE name = 'conversation_history';
     """)
     conn.commit()
+
+    # Migration: add conversation_history for existing production DBs
+    try:
+        conn.execute("ALTER TABLE session_state ADD COLUMN conversation_history TEXT DEFAULT '[]'")
+        conn.commit()
+    except Exception:
+        pass
 
 
 # ──────────────────────────────────────────────
@@ -135,12 +149,13 @@ def upsert_session_state(data: dict[str, Any]) -> None:
     conn.execute(
         """
         INSERT INTO session_state
-            (character, turns, last_question, last_options, preferred_profile, updated_at)
-        VALUES (?, ?, ?, ?, ?, datetime('now'))
+            (character, turns, last_question, last_options, conversation_history, preferred_profile, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, datetime('now'))
         ON CONFLICT(character) DO UPDATE SET
             turns             = excluded.turns,
             last_question     = excluded.last_question,
             last_options      = excluded.last_options,
+            conversation_history = COALESCE(excluded.conversation_history, session_state.conversation_history),
             preferred_profile = excluded.preferred_profile,
             updated_at        = datetime('now')
         """,
@@ -149,10 +164,35 @@ def upsert_session_state(data: dict[str, Any]) -> None:
             row["turns"],
             row["last_question"],
             row.get("last_options"),
+            row.get("conversation_history"),
             row.get("preferred_profile"),
         ),
     )
     conn.commit()
+
+
+def delete_character(name: str) -> bool:
+    """Delete a character and all associated data (events, session state)."""
+    conn = get_conn()
+    # Delete events & archives for this character
+    conn.execute("DELETE FROM events WHERE protagonist = ?", (name,))
+    conn.execute("DELETE FROM event_archive WHERE character = ?", (name,))
+    # Delete session state
+    conn.execute("DELETE FROM session_state WHERE character = ?", (name,))
+    # Delete character entry
+    cursor = conn.execute("DELETE FROM characters WHERE name = ?", (name,))
+    conn.commit()
+    # Also clean up ChromaDB events for this character
+    try:
+        from app.memory.vectors import VectorStore
+        vs = VectorStore()
+        events = vs.get_all_by_metadata("events", {"protagonist": name})
+        if events and events.get("ids"):
+            for event_id in events["ids"]:
+                vs.delete("events", event_id)
+    except Exception:
+        pass  # best-effort cleanup
+    return cursor.rowcount > 0
 
 
 def delete_session_state(character: str) -> None:
@@ -169,7 +209,7 @@ def delete_session_state(character: str) -> None:
 def _serialise(data: dict[str, Any]) -> dict[str, Any]:
     """Convert Python objects to JSON strings for SQLite storage."""
     out = dict(data)
-    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options"):
+    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options", "conversation_history"):
         if key in out and not isinstance(out.get(key), str):
             out[key] = json.dumps(out[key], ensure_ascii=False)
     return out
@@ -178,7 +218,7 @@ def _serialise(data: dict[str, Any]) -> dict[str, Any]:
 def _deserialise(row: dict[str, Any]) -> dict[str, Any]:
     """Convert JSON strings back to Python objects."""
     out = dict(row)
-    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options"):
+    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options", "conversation_history"):
         val = out.get(key)
         if val and isinstance(val, str):
             try:
