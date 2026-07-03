@@ -107,14 +107,7 @@ npm run dev
 
 ## 🎬 Demo Flow (2-3 minutes)
 
-1. Open the app → pick a character: **Elizabeth Bennet** or **Lena** (from 4 pre-loaded options)
-2. Ask Elizabeth about Darcy's proposal → see 4 options with OOC risk scores and type labels (normal / surprise / violation)
-3. Pick a response → feedback is saved to GenBias memory
-4. Follow up with a question → the character remembers the previous exchange via WorkingMemory
-5. Switch to Lena (an original character) → ask her about the Alpha's gaze → see the same system handle a character Qwen has never read before
-6. View any character's cognitive profile (traits, behavior patterns, relationships)
-7. Run Sleep Consolidation → see how NMA abstracts events into traits
-
+Pick a character, ask a question, and see NMA generate options scored by OOC risk. Mark what fits, and GenBias learns your preference. Switch characters or refresh the page — the memory persists. Run Sleep Consolidation to watch the agent abstract events into evolving traits.
 
 ---
 
