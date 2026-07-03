@@ -38,21 +38,20 @@ logger = logging.getLogger(__name__)
 
 _CONFLICT_MAP: dict[str, set[str]] = {
     "avoid": {"brave", "courageous", "bold", "fearless", "reckless",
-              "勇敢", "无畏", "果断", "冲", "直面", "迎战", "confrontational"},
+              "confrontational", "charge", "head-on"},
     "submit": {"dominant", "proud", "defiant", "rebellious",
-               "主导", "骄傲", "不驯", "反抗", "反叛", "不屈", "defy"},
+               "defy", "unbowed", "unyielding"},
     "retreat": {"persistent", "stubborn", "determined", "resolute",
-                "坚持", "固执", "坚定", "不退", "守", "绝不"},
+                "unrelenting", "tenacious", "steadfast"},
     "betray": {"loyal", "faithful", "devoted", "true",
-               "忠诚", "忠贞", "信赖", "信任", "忠心",
-               "框架", "规则", "秩序", "体系", "system", "order",
-               "规则驱动", "框架内", "从未质疑", "pack", "守序"},
+               "system", "order", "rule-bound", "rule-driven",
+               "unquestioning", "pack", "hierarchy"},
     "deceive": {"honest", "honorable", "forthright", "direct", "truthful",
-                "诚实", "正直", "直接", "光明", "坦荡"},
+                "upright", "aboveboard"},
     "hesitate": {"decisive", "resolute", "unwavering", "confident",
-                 "果断", "坚定", "自信", "从不犹豫", "确信"},
+                 "unhesitating", "certain"},
     "flee": {"protective", "guardian", "defender", "fearless",
-             "保护", "守护", "无畏", "担当", "承担", "不退让", "直面"},
+             "steadfast", "unyielding", "face danger"},
 }
 
 _PIVOTAL_KEYWORDS = [
