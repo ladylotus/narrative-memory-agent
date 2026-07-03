@@ -81,31 +81,31 @@ class TestOOCFormula:
         return ValidationService()
 
     def test_perfect_consistency(self, svc: ValidationService) -> None:
-        """All dimensions at max → risk near 0."""
+        """All dimensions at max → risk 0 (perfect option, no surprise)."""
         t = b = c = 1.0
         d = 0.0  # semantically identical
         p = 0.0  # no surprise
-        # 1 - (0.35*1 + 0.25*1 + 0.15*(1-0) + 0.15*1 - 0.1*0)
-        # = 1 - (0.35 + 0.25 + 0.15 + 0.15 - 0)
-        # = 1 - 0.9 = 0.1
+        # 1 - (0.3889*1 + 0.2778*1 + 0.1667*(1-0) + 0.1667*1 + 0.1*0)
+        # = 1 - (0.3889 + 0.2778 + 0.1667 + 0.1667 + 0)
+        # = 1 - 1.0001 ≈ 0.0
         risk = _compute_risk(svc, t, b, d, c, p)
-        assert risk == pytest.approx(0.1, abs=1e-4)
+        assert risk == pytest.approx(0.0, abs=1e-4)
 
     def test_complete_violation(self, svc: ValidationService) -> None:
-        """All consistency dims at min, high surprise → risk at max (1.0 clamped)."""
+        """All dimensions at min, high surprise → risk high (0.9, not clamped)."""
         t = b = c = 0.0
         d = 1.0  # semantically very far
         p = 1.0  # very surprising
-        # 1 - (0 + 0 + 0 + 0 - 0.1*1)
-        # = 1 - (-0.1) = 1.1 → clamped to 1.0
+        # 1 - (0 + 0 + 0 + 0 + 0.1*1)
+        # = 1 - 0.1 = 0.9
         risk = _compute_risk(svc, t, b, d, c, p)
-        assert risk == 1.0
+        assert risk == pytest.approx(0.9, abs=1e-4)
 
-    def test_high_surprise_increases_risk(self, svc: ValidationService) -> None:
-        """Surprise term (ε*P) subtracts from sum, making risk higher."""
+    def test_high_surprise_decreases_risk(self, svc: ValidationService) -> None:
+        """Surprise term (ε*P) adds to sum inside parens, making risk lower."""
         baseline = _compute_risk(svc, t=0.8, b=0.7, d=0.3, c=0.8, p=0.0)
         with_surprise = _compute_risk(svc, t=0.8, b=0.7, d=0.3, c=0.8, p=1.0)
-        assert with_surprise > baseline
+        assert with_surprise < baseline
 
     def test_semantic_distance_high_increases_risk(self, svc: ValidationService) -> None:
         """Higher D (farther from known events) increases risk via γ*(1-D) reduction."""
@@ -132,12 +132,12 @@ class TestOOCFormula:
         assert risk == 0.0
 
     def test_all_neutral(self, svc: ValidationService) -> None:
-        """All dimensions at neutral (0.5) → middle risk."""
-        # 1 - (0.35*0.5 + 0.25*0.5 + 0.15*0.5 + 0.15*0.5 - 0.1*0.5)
-        # = 1 - (0.175 + 0.125 + 0.075 + 0.075 - 0.05)
-        # = 1 - 0.4 = 0.6
+        """All dimensions at neutral (0.5) → moderate risk (~0.45)."""
+        # 1 - (0.3889*0.5 + 0.2778*0.5 + 0.1667*0.5 + 0.1667*0.5 + 0.1*0.5)
+        # = 1 - (0.1945 + 0.1389 + 0.0834 + 0.0834 + 0.05)
+        # = 1 - 0.55 ≈ 0.45
         risk = _compute_risk(svc, t=0.5, b=0.5, d=0.5, c=0.5, p=0.5)
-        assert risk == pytest.approx(0.6, abs=1e-4)
+        assert risk == pytest.approx(0.45, abs=1e-2)
 
     def test_classify_violation(self, svc: ValidationService) -> None:
         """Low consistency scores + high risk → violation type."""
@@ -182,25 +182,24 @@ class TestOOCBoundaries:
         return ValidationService()
 
     def test_risk_at_066_threshold(self, svc: ValidationService) -> None:
-        """Risk exactly 0.66 → classification depends on consistency + P."""
-        # Just above 0.66, low P, mid consistency → violation
-        # T=0.3, B=0.3, D=0.5, C=0.3, P=0.2
-        # = 1 - (0.35*0.3 + 0.25*0.3 + 0.15*0.5 + 0.15*0.3 - 0.1*0.2)
-        # = 1 - (0.105 + 0.075 + 0.075 + 0.045 - 0.02)
-        # = 1 - 0.28 = 0.72
-        r = _compute_risk(svc, t=0.3, b=0.3, d=0.5, c=0.3, p=0.2)
+        """Risk above 0.66 + low consistency → violation."""
+        # T=0.25, B=0.25, D=0.5, C=0.25, P=0.2
+        # = 1 - (0.3889*0.25 + 0.2778*0.25 + 0.1667*0.5 + 0.1667*0.25 + 0.02)
+        # = 1 - (0.0972 + 0.0695 + 0.0834 + 0.0417 + 0.02)
+        # = 1 - 0.3117 = 0.6883
+        r = _compute_risk(svc, t=0.25, b=0.25, d=0.5, c=0.25, p=0.2)
         assert r > 0.66
-        result = _classify(svc, t=0.3, b=0.3, d=0.5, c=0.3, p=0.2)
+        result = _classify(svc, t=0.25, b=0.25, d=0.5, c=0.25, p=0.2)
         assert result["type"] == "violation"
 
-    def test_risk_below_066_is_normal(self, svc: ValidationService) -> None:
-        """Risk below 0.66 → always normal regardless of P."""
+    def test_low_risk_high_p_is_surprise(self, svc: ValidationService) -> None:
+        """Low risk + high P → surprise type, not violation or normal."""
         result = _classify(svc, t=0.8, b=0.7, d=0.5, c=0.8, p=0.9)
-        assert result["type"] == "normal"
+        assert result["type"] == "surprise"
 
     def test_surprise_classification_boundary(self, svc: ValidationService) -> None:
         """High risk + high P + good consistency = surprise, not violation."""
-        result_violation = _classify(svc, t=0.2, b=0.2, d=0.5, c=0.2, p=0.9)
+        result_violation = _classify(svc, t=0.15, b=0.15, d=0.5, c=0.15, p=0.9)
         assert result_violation["type"] == "violation"  # consistency too low
 
         result_surprise = _classify(svc, t=0.5, b=0.5, d=0.8, c=0.5, p=0.9)
@@ -226,7 +225,7 @@ def _compute_risk(
         + svc.beta * b
         + svc.gamma * (1.0 - d)
         + svc.delta * c
-        - svc.epsilon * p
+        + svc.epsilon * p
     )
     return max(0.0, min(1.0, risk))
 
@@ -239,7 +238,9 @@ def _classify(
     consistency = (t + b + c) / 3.0
     if risk >= 0.66 and consistency < 0.4:
         return {"type": "violation", "risk": risk}
-    elif risk >= 0.66 and p >= 0.6 and consistency >= 0.4:
+    elif p >= 0.55 and consistency >= 0.4:
         return {"type": "surprise", "risk": risk}
+    elif risk >= 0.66:
+        return {"type": "violation", "risk": risk}
     else:
         return {"type": "normal", "risk": risk}

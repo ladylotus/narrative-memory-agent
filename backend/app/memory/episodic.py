@@ -50,6 +50,11 @@ class EpisodicMemory:
                 ON events(protagonist);
             CREATE INDEX IF NOT EXISTS idx_events_chapter
                 ON events(chapter);
+            -- Zwaan expression indexes: no schema change, just query-ready
+            CREATE INDEX IF NOT EXISTS idx_events_zwaan_time
+                ON events(json_extract(zwaan_dims, '$.time'));
+            CREATE INDEX IF NOT EXISTS idx_events_zwaan_space
+                ON events(json_extract(zwaan_dims, '$.space'));
 
             CREATE TABLE IF NOT EXISTS event_archive (
                 id          TEXT PRIMARY KEY,
@@ -65,6 +70,7 @@ class EpisodicMemory:
                 ON event_archive(character);
         """)
         self._migrate_v2()
+        self._migrate_v3()
         self._conn.commit()
 
     def _migrate_v2(self) -> None:
@@ -78,6 +84,19 @@ class EpisodicMemory:
                 )
             except sqlite3.OperationalError:
                 pass  # column already exists
+
+    def _migrate_v3(self) -> None:
+        """Add Zwaan expression indexes for existing databases."""
+        for idx_name, expr in (
+            ("idx_events_zwaan_time", "json_extract(zwaan_dims, '$.time')"),
+            ("idx_events_zwaan_space", "json_extract(zwaan_dims, '$.space')"),
+        ):
+            try:
+                self._conn.execute(
+                    f"CREATE INDEX IF NOT EXISTS {idx_name} ON events({expr})"
+                )
+            except sqlite3.OperationalError:
+                pass
 
         # Set default last_accessed_at for existing rows
         try:

@@ -1,6 +1,10 @@
 """Circuit B — OOC validation using multi-factor scoring via Qwen + real vector distance.
 
-Implements: OOC_Risk = 1 - (αT + βB + γ(1-D) + δC - εP)
+Implements: OOC_Risk = 1 - (αT + βB + γ(1-D) + δC + εP)
+
+The four consistency weights (αβγδ) are renormalised so the maximum
+consistency sum without surprise equals 1.0, making a perfect option
+score 0% risk.
 
 Semantic distance (D) is computed from real ChromaDB embedding distance,
 not estimated by the LLM.
@@ -38,20 +42,21 @@ class ValidationService:
     """Validate character responses against established cognitive profile.
 
     Uses a multi-factor model:
-      α (trait consistency)  — 0.35  — does it violate core traits?
-      β (behaviour pattern)  — 0.25  — is it consistent with past behaviour?
-      γ (semantic distance)  — 0.15  — is it semantically far from the character's
+      α (trait consistency)  — 0.389 — does it violate core traits?
+      β (behaviour pattern)  — 0.278 — is it consistent with past behaviour?
+      γ (semantic distance)  — 0.167 — is it semantically far from the character's
                               historical events? (computed from real ChromaDB vectors)
-      δ (self-consistency)   — 0.15  — is the option internally consistent?
-      ε (novelty / surprise) — 0.10  — is it unexpectedly but plausibly interesting?
+      δ (self-consistency)   — 0.167 — is the option internally consistent?
+      ε (novelty / surprise) — 0.100 — is it unexpectedly but plausibly interesting?
     """
 
     def __init__(self) -> None:
-        self.alpha = 0.35
-        self.beta = 0.25
-        self.gamma = 0.15
-        self.delta = 0.15
-        self.epsilon = 0.10
+        # α:β:γ:δ = 35:25:15:15, renormalised to sum 1.0
+        self.alpha = round(0.35 / 0.90, 4)  # 0.3889
+        self.beta = round(0.25 / 0.90, 4)   # 0.2778
+        self.gamma = round(0.15 / 0.90, 4)  # 0.1667
+        self.delta = round(0.15 / 0.90, 4)  # 0.1667
+        self.epsilon = 0.10  # surprise — additive bonus
         self._vectors = VectorStore()
 
     # ── public ───────────────────────────────────
@@ -139,7 +144,7 @@ class ValidationService:
                 + self.beta * b
                 + self.gamma * (1.0 - d)
                 + self.delta * c
-                - self.epsilon * p
+                + self.epsilon * p
             )
             # Clamp to [0, 1]
             risk = max(0.0, min(1.0, risk))

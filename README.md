@@ -34,7 +34,7 @@ The system works with **any fiction** — pre-loaded demo data includes characte
 
 ![Architecture Diagram](docs/architecture.en.html)
 
-The system has three layers:
+The system has two active memory layers plus a character schema store:
 
 ```
 User/Browser → Next.js Frontend → FastAPI Backend → Qwen Cloud LLM
@@ -49,14 +49,21 @@ User/Browser → Next.js Frontend → FastAPI Backend → Qwen Cloud LLM
                     ┌───────────────────┼───────────────────┐
                     │  Working Memory   │  Episodic (SQLite)│
                     │  (Session buffer) │  (Event timeline) │
+                    │  ↳ SQLite persist │  ↳ Zwaan-indexed  │
                     └───────────────────┴───────────────────┘
                     ┌───────────────────────────────────────┐
-                    │  Semantic Memory (Character schemas)  │
-                    │  Vector Store (ChromaDB embeddings)   │
+                    │  Character Schema Store (SQLite)      │
+                    │  traits · behavior · arc · relations  │
+                    └───────────────────────────────────────┘
+                    ┌───────────────────────────────────────┐
+                    │  Vector Store (ChromaDB)              │
+                    │  Embedding search for OOC validation  │
                     └───────────────────────────────────────┘
 ```
 
 For a full interactive diagram, open `docs/architecture.en.html` in a browser.
+
+> **Single-author workspace by design.** NMA has no user identity or authentication system — no login, no multi-user isolation. All data belongs to the current workspace. This is intentional: the system prioritizes depth of character relationship over multi-user infrastructure.
 
 ---
 
@@ -117,9 +124,10 @@ npm run dev
 
 | Layer | Store | What it holds |
 |-------|-------|---------------|
-| **Working Memory** (Layer 1) | In-memory buffer | Current conversation context (~10 turns), attention routing |
-| **Episodic Memory** (Layer 2) | SQLite | Event timeline indexed by Zwaan's 5 dimensions (time/space/causality/intentionality/self) |
-| **Semantic Memory** (Layer 3) | SQLite + ChromaDB | Character schemas (traits, behavior patterns, relationships, arc stage), vector embeddings for similarity search |
+|| **Working Memory** (Layer 1) | In-memory buffer, persisted to SQLite | Current conversation context (~10 turns), attention routing, cross-session recall |
+|| **Episodic Memory** (Layer 2) | SQLite | Zwaan-indexed event timeline. 3 dimensions active in retrieval/consolidation (protagonist, intent, causality); time/space indexed via expression indexes (json_extract) for future use |
+|| **Character Schema Store** | SQLite (`characters` table) | Traits, behavior patterns, arc stage, motivation, relationships, preferred_profile. Written by ingestion and sleep consolidation; read by Circuit A for generation |
+|| **Vector Store** | ChromaDB | Embedding similarity search for OOC validation (D — semantic distance). Not a memory layer — a search tool used by Circuit B |
 
 ### Dual Circuit Engine
 

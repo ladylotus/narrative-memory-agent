@@ -16,7 +16,7 @@ The system comes pre-loaded with four characters across two novels — Elizabeth
 
 **Dual Circuit Engine.** Circuit A (Generation) prompts Qwen 3.6-plus with the character's full profile — backstory, traits, motivation, arc stage — to produce diverse responses. Circuit B (Validation) scores each option on five OOC factors: trait consistency, behavior patterns, semantic distance (from real ChromaDB embeddings, not LLM-estimated), self-consistency, and surprise value. Options are classified as fitting, surprising, or out-of-character.
 
-**Three-Layer Memory.** Working Memory buffers current conversation context and persists to SQLite. Episodic Memory stores an event timeline that decays over time — low-importance memories are archived during Sleep. Semantic Memory holds character schemas and vector embeddings (ChromaDB) for similarity search.
+**Two Memory Layers + Schema Store.** Working Memory buffers current conversation context and persists to SQLite for cross-session recall. Episodic Memory stores a Zwaan-indexed event timeline that decays over time — low-importance memories are archived during Sleep. The Character Schema Store (SQLite `characters` table) holds traits, behavior patterns, arc stage, motivation, and relationships — written by Ingestion and Sleep, read by Circuit A for generation. A separate Vector Store (ChromaDB) provides embedding similarity search for the OOC validation D-score (semantic distance), but is not a memory layer.
 
 **GenBias Learning Loop.** When a user marks a response as fitting, NMA updates a 5-dimensional preference vector via EMA. This bias is injected into future generations — the system learns what responses each user prefers for each character.
 

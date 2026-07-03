@@ -13,7 +13,6 @@ from __future__ import annotations
 
 import json
 import re
-import uuid
 from typing import Any
 
 from openai import AsyncOpenAI
@@ -89,9 +88,11 @@ class IngestionService:
                 )
                 all_characters[name]["relations"].update(info.get("relations", {}))
 
-        # Generate embeddings & store events
-        for event in all_events:
-            embedding = await self._get_embedding(event.summary)
+        # Generate embeddings (batch) & store events
+        texts = [event.summary for event in all_events]
+        embeddings = await self._get_embeddings(texts)
+
+        for event, embedding in zip(all_events, embeddings):
             if embedding:
                 event.embedding = embedding
             self._episodic.add_event(event)
@@ -262,8 +263,9 @@ class IngestionService:
             zwaan = {"time": "unknown", "space": "unknown", "protagonist": data.get("protagonist", "unknown"),
                      "causality": "unknown", "intent": "unknown"}
 
+        summary = data.get("summary", "") or ""
         return NarrativeEvent(
-            id=f"evt_{uuid.uuid4().hex[:10]}",
+            id=f"evt_{abs(hash(f'{chapter}_{summary}')) % 10**10}",
             chapter=chapter,
             position=f"{chunk_index + 1}/?",
             protagonist=data.get("protagonist", "unknown"),
@@ -274,19 +276,21 @@ class IngestionService:
             zwaan_dims=zwaan,
         )
 
-    # ── Embedding ──────────────────────────────────────────
+    # ── Embedding (batch) ──────────────────────────────────
 
-    async def _get_embedding(self, text: str) -> list[float] | None:
-        """Generate embedding via Qwen's text-embedding-v3."""
+    async def _get_embeddings(self, texts: list[str]) -> list[list[float] | None]:
+        """Generate embeddings for multiple texts via Qwen's text-embedding-v3 (single API call)."""
+        if not texts:
+            return []
         client = _get_client()
         try:
             resp = await client.embeddings.create(
                 model=QWEN_EMBEDDING_MODEL,
-                input=text,
+                input=texts,
             )
-            return resp.data[0].embedding
+            return [d.embedding for d in resp.data]
         except Exception:
-            return None
+            return [None] * len(texts)
 
     # ── Character merging ──────────────────────────────────
 

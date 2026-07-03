@@ -338,11 +338,11 @@
         <!-- Arrow back to API layer -->
         <line x1="290" y1="661" x2="222" y2="661" stroke="#34d399" stroke-width="1" marker-end="url(#arrow-emerald)"/>
 
-        <!-- --- Right Panel: 3-Layer Memory + Vector Store (inside Storage Boundary) --- -->
+        <!-- --- Right Panel: Memory Layers + Schema Store + Vector Store (inside Storage Boundary) --- -->
 
         <!-- Section label -->
         <text x="840" y="258" fill="#a78bfa" font-size="9" font-weight="600" text-anchor="middle">
-          ═══ Three-Layer Memory System ═══
+          ═══ Memory Layers + Schema Store ═══
         </text>
 
         <!-- Working Memory -->
@@ -370,21 +370,18 @@
         </text>
         <text x="700" y="333" fill="#34d399" font-size="8">Layer 2</text>
 
-        <!-- Arrow: Episodic → Semantic -->
-        <line x1="840" y1="415" x2="840" y2="445" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
-
-        <!-- Semantic Memory -->
+        <!-- Character Schema Store (SQLite) -->
         <rect x="700" y="450" width="280" height="60" rx="6"
               fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
         <text x="840" y="472" fill="white" font-size="11" font-weight="600" text-anchor="middle">
-          Semantic Memory
+          Character Schema Store
         </text>
         <text x="840" y="490" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Character schemas &bull; Traits &bull; Relations &bull; JSON
+          SQLite &bull; traits &bull; arc &bull; relations
         </text>
-        <text x="700" y="428" fill="#a78bfa" font-size="8">Layer 3</text>
+        <!-- Schema Store is not a memory layer — it is a persisted character profile store -->
 
-        <!-- Vector Store -->
+        <!-- Vector Store (ChromaDB) -->
         <rect x="730" y="540" width="220" height="50" rx="6"
               fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
         <text x="840" y="560" fill="white" font-size="11" font-weight="600" text-anchor="middle">
@@ -512,12 +509,13 @@
       <div class="card">
         <div class="card-header">
           <div class="card-dot" style="background:#a78bfa"></div>
-          <h3>Three-Layer Memory</h3>
+          <h3>Two-Layer Memory + Schema Store</h3>
         </div>
         <ul>
-          <li>&bull; Layer 1: Working Memory (session buffer)</li>
+          <li>&bull; Layer 1: Working Memory (session buffer, persisted)</li>
           <li>&bull; Layer 2: Episodic (Zwaan 5-dim indexed events)</li>
-          <li>&bull; Layer 3: Semantic (character trait schemas)</li>
+          <li>&bull; Character Schema Store (SQLite: traits, arc, relations)</li>
+          <li>&bull; Vector Store (ChromaDB: embedding search for OOC D-score)</li>
           <li>&bull; Sleep Cycle: facts→integration→pruning</li>
           <li>&bull; Psychology-backed design (8 cited papers)</li>
         </ul>
