@@ -65,9 +65,11 @@ export default function ProfileView({
               </div>
             </div>
             <TraitBar pct={t.conf * 100} />
-            <div className="trait-evidence">
-              📄 {t.evidence} supporting passages
-            </div>
+            {t.evidence > 0 && (
+              <div className="trait-evidence">
+                📄 {t.evidence} supporting passages
+              </div>
+            )}
           </div>
         ))}
 
