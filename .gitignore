@@ -47,3 +47,10 @@ internal/
 
 # Runtime data (ChromaDB, logs)
 data/
+# Debug/utility scripts (local only)
+scripts/add_column.py
+scripts/check_db.py
+scripts/clear_caelan.py
+scripts/final_reset.py
+scripts/list_sessions.py
+scripts/reset_sessions.py

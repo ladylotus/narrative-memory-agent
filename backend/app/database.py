@@ -92,8 +92,8 @@ def upsert_character(data: dict[str, Any]) -> None:
         """
         INSERT INTO characters
             (name, aliases, traits, relations, motivation, arc_stage,
-             backstory, embedding_centroid, preferred_profile, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+             backstory, embedding_centroid, preferred_profile, last_sleep_report, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         ON CONFLICT(name) DO UPDATE SET
             aliases           = excluded.aliases,
             traits            = excluded.traits,
@@ -103,6 +103,7 @@ def upsert_character(data: dict[str, Any]) -> None:
             backstory         = excluded.backstory,
             embedding_centroid = excluded.embedding_centroid,
             preferred_profile  = excluded.preferred_profile,
+            last_sleep_report  = excluded.last_sleep_report,
             updated_at        = datetime('now')
         """,
         (
@@ -115,6 +116,7 @@ def upsert_character(data: dict[str, Any]) -> None:
             row["backstory"],
             row["embedding_centroid"],
             row["preferred_profile"],
+            row.get("last_sleep_report", ""),
         ),
     )
     conn.commit()

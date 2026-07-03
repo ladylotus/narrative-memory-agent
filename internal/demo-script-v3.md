@@ -68,12 +68,12 @@
 4. **等待** 4 张选项卡片加载出来（~5-10s，服务器响应较慢）
 5. 鼠标**依次划过**每张卡片，停一秒（让观众看到 OOC 标签）：
    - 选项 A: `✅ Fitting · XX%`
-   - 选项 B: `✅ Fitting · XX%`
-   - 选项 C: `⚠️ Off-track · XX%` 或 `❌ OOC · XX%`
-   - 选项 D: `❌ OOC · XX%`
+   - 选项 B: `✅ Fitting · XX%` 或 `🟠 Surprising · XX%`
+   - 选项 C: `⚠️ Off-track · XX%`
+   - 选项 D: `❌ OOC · XX%` 或 `🚫 OOC Violation · XX%`
 6. 点击**选项 B**（Fitting 方向的选项——实际选 OOC 最低的那个）
 
-**特别注意：** OOC 标签是 `✅ Fitting` / `⚠️ Off-track` / `❌ OOC`，口播要注意不要说成 Low Risk/High Risk。
+**特别注意：** OOC 标签有 `✅ Fitting` / `🟠 Surprising` / `⚠️ Off-track` / `❌ OOC` / `🚫 OOC Violation`。口播要注意不要说成 Low Risk/High Risk，直接念标签名。
 
 ---
 
@@ -93,7 +93,7 @@
 1. 侧栏点击 **Caelan Ashmark**（🐺）
 2. 在输入框打字：
    ```
-   The Alpha looked at you during the banquet. What went through your mind?
+   At the banquet, your Bond triggered to an Omega kitchen worker. What went through your mind?
    ```
 3. 点击 **What would you do?**
 4. 选项加载后，鼠标划过 2-3 张卡片（展示与 Elizabeth 完全不同的风格）
@@ -106,7 +106,7 @@
 **画面操作：**
 1. 侧栏切回 **Elizabeth Bennet**
 2. 点击 **💤 Sleep Log** tab
-3. 点击 **🌙 Run Sleep Consolidation**
+3. 点击 **🌙 Run Again**（预跑后按钮已变为 Run Again）
 4. **等待** 三段报告展开（~5-15s，后台正在分析）：
    - `💤 Fact Consolidation` — 数据/冲突检测
    - `🧩 Abstraction & Integration` — 模式提取
@@ -202,9 +202,9 @@
        would break canon.
 
        The core innovation: Dual Circuit Architecture. Circuit A generates
-       creative options. Circuit B validates each one against six OOC
+       creative options. Circuit B validates each one against five OOC
        factors — trait consistency, behavioral patterns, semantic distance,
-       self-consistency, causality, and surprisal."
+       self-consistency, and surprisal."
 
 画面: [0:35] 侧栏点 Elizabeth
       [0:40] 打字特写: Mr. Darcy just proposed. What will you tell him?
@@ -212,9 +212,9 @@
       [0:48] 加载动画
       [0:53] 依次划过 4 张选项卡:
                ✅ Fitting · 10%
-               ✅ Fitting · 25%
+               ✅ Fitting · 25% 或 🟠 Surprising
                ⚠️ Off-track · 45%
-               ❌ OOC · 88%
+               ❌ OOC · 88% 或 🚫 OOC Violation
       [1:00] 点击选项 B（Fitting）
 ```
 
@@ -248,7 +248,7 @@
        The prompt architecture is fully generic. Any character, any novel."
 
 画面: [1:20] 侧栏点 Caelan
-      [1:25] 打字: The Alpha looked at you during the banquet...
+      [1:25] 打字: At the banquet, your Bond triggered to an Omega kitchen worker...
       [1:30] 点 What would you do?
       [1:33] 加载完成 → 鼠标划过 2-3 张卡
       [1:38] 展示选项 A 的内容片段（风格明显不同）
@@ -270,7 +270,7 @@
 
 画面: [1:40] 侧栏点 Elizabeth
       [1:42] 切到 💤 Sleep Log tab
-      [1:45] 点击 🌙 Run Sleep Consolidation
+      [1:45] 点击 🌙 Run Again
       [1:48] 加载中...
       [1:52] 三段报告展开:
               💤 Fact Consolidation
