@@ -146,7 +146,7 @@ Inspired by human memory consolidation (Walker & Stickgold, 2010):
 |----------|-----------|---------|
 | **Frontend** | Next.js (TypeScript) | UI, character management, conversation interface |
 | **Backend** | FastAPI (Python 3.11) | REST API, business logic, memory management |
-| **LLM** | Qwen 3.6-plus | Character voice generation, OOC evaluation |
+| **LLM** | Qwen 3.6-flash (default) | Character voice generation, OOC evaluation |
 | **Embedding** | Qwen text-embedding-v3 | Semantic similarity for OOC distance scoring |
 | **Vector Store** | ChromaDB | Embedding storage and similarity search |
 | **Database** | SQLite | Episodic events, character schemas, session state |
