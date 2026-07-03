@@ -117,10 +117,10 @@ Pick a character, ask a question, and see NMA generate options scored by OOC ris
 
 | Layer | Store | What it holds |
 |-------|-------|---------------|
-|| **Working Memory** (Layer 1) | In-memory buffer, persisted to SQLite | Current conversation context (~10 turns), attention routing, cross-session recall |
-|| **Episodic Memory** (Layer 2) | SQLite | Zwaan-indexed event timeline. 3 dimensions active in retrieval/consolidation (protagonist, intent, causality); time/space indexed via expression indexes (json_extract) for future use |
-|| **Character Schema Store** | SQLite (`characters` table) | Traits, behavior patterns, arc stage, motivation, relationships, preferred_profile. Written by ingestion and sleep consolidation; read by Circuit A for generation |
-|| **Vector Store** | ChromaDB | Embedding similarity search for OOC validation (D — semantic distance). Not a memory layer — a search tool used by Circuit B |
+| **Layer 1** | Working Memory | In-memory buffer, persisted to SQLite. Current conversation context (~10 turns), attention routing, cross-session recall |
+| **Layer 2** | Episodic Memory | SQLite. Zwaan-indexed event timeline. 3 dimensions active in retrieval/consolidation (protagonist, intent, causality); time/space indexed via expression indexes (json_extract) for future use |
+| **Schema** | Character Schema Store | SQLite (`characters` table). Traits, behavior patterns, arc stage, motivation, relationships, preferred_profile. Written by ingestion and sleep consolidation; read by Circuit A for generation |
+| **Tool** | Vector Store | ChromaDB. Embedding similarity search for OOC validation (D — semantic distance). Not a memory layer — a search tool used by Circuit B |
 
 ### Dual Circuit Engine
 
