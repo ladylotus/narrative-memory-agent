@@ -1,530 +1,286 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Narrative Memory Agent — Architecture Diagram</title>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'JetBrains Mono', monospace;
-      background: #020617;
-      min-height: 100vh; padding: 2rem; color: white;
-    }
-    .container { max-width: 1200px; margin: 0 auto; }
-    .header { margin-bottom: 2rem; }
-    .header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.5rem; }
-    .pulse-dot {
-      width: 12px; height: 12px; background: #22d3ee; border-radius: 50%;
-      animation: pulse 2s infinite;
-    }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
-    h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; }
-    .subtitle { color: #94a3b8; font-size: 0.875rem; margin-left: 1.75rem; }
-    .diagram-container {
-      background: rgba(15, 23, 42, 0.5); border-radius: 1rem;
-      border: 1px solid #1e293b; padding: 1.5rem; overflow-x: auto;
-    }
-    svg { width: 100%; min-width: 1000px; display: block; }
-    .cards {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1rem; margin-top: 2rem;
-    }
-    .card {
-      background: rgba(15, 23, 42, 0.5); border-radius: 0.75rem;
-      border: 1px solid #1e293b; padding: 1.25rem;
-    }
-    .card-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; }
-    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .card-dot.cyan { background: #22d3ee; }
-    .card-dot.emerald { background: #34d399; }
-    .card-dot.violet { background: #a78bfa; }
-    .card-dot.amber { background: #fbbf24; }
-    .card h3 { font-size: 0.875rem; font-weight: 600; }
-    .card ul { list-style: none; color: #94a3b8; font-size: 0.75rem; }
-    .card li { margin-bottom: 0.375rem; }
-    .footer { text-align: center; margin-top: 1.5rem; color: #475569; font-size: 0.75rem; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NMA — System Architecture</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root{
+    --bg:#0a0a0c; --panel:#131316; --panel-2:#111114;
+    --line:rgba(255,255,255,0.07); --line-strong:rgba(255,255,255,0.14);
+    --ink:rgba(255,255,255,0.92); --muted:rgba(255,255,255,0.55); --faint:rgba(255,255,255,0.35);
+    --qwen:#fbbf24; --qwen-soft:rgba(251,191,36,0.10);
+    --store:#4ade80; --store-soft:rgba(74,222,128,0.08);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:var(--bg);color:var(--ink);font-family:"Onest",system-ui,-apple-system,sans-serif;padding:48px 32px}
+  .wrap{max-width:1700px;margin:0 auto}
+  .diagram{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:8px;overflow-x:auto}
+  svg{display:block;min-width:1660px}
+  svg text{font-family:"Onest",system-ui,sans-serif}
+  svg .mono{font-family:"JetBrains Mono",ui-monospace,monospace}
+
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:24px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:20px 22px}
+  .card h3{font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+  .card li{list-style:none;font-size:13.5px;line-height:1.75;color:var(--ink)}
+  .card li b{font-weight:600}
+  .card .m{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12.5px;color:var(--muted)}
+  .footer{margin-top:22px;text-align:center;font-size:12px;letter-spacing:0.08em;text-transform:uppercase;color:var(--faint)}
+  @media(max-width:900px){.cards{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="header-row">
-        <div class="pulse-dot"></div>
-        <h1>Narrative Memory Agent &mdash; Architecture</h1>
-      </div>
-      <p class="subtitle">Qwen Cloud Global AI Hackathon &bull; Track 1: MemoryAgent &bull; 2026</p>
-    </div>
+<div class="wrap">
 
-    <div class="diagram-container">
-      <svg viewBox="0 0 1050 920">
-        <defs>
-          <marker id="arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
-          </marker>
-          <marker id="arrow-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399"/>
-          </marker>
-          <marker id="arrow-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee"/>
-          </marker>
-          <marker id="arrow-violet" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="#a78bfa"/>
-          </marker>
-          <marker id="arrow-amber" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-            <polygon points="0 0, 10 3.5, 0 7" fill="#fbbf24"/>
-          </marker>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
-          </pattern>
-        </defs>
+<div class="diagram">
+<svg viewBox="0 0 1660 1010" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="a-ink" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L8,3.5 L0,7 Z" fill="rgba(255,255,255,0.55)"/>
+    </marker>
+    <marker id="a-qwen" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L8,3.5 L0,7 Z" fill="#fbbf24"/>
+    </marker>
+    <marker id="a-store" markerWidth="9" markerHeight="9" refX="7" refY="3.5" orient="auto">
+      <path d="M0,0 L8,3.5 L0,7 Z" fill="#4ade80"/>
+    </marker>
+  </defs>
 
-        <!-- Background Grid -->
-        <rect width="100%" height="100%" fill="url(#grid)"/>
+  <!-- ============ TITLE ============ -->
+  <text x="44" y="42" font-size="22" font-weight="700" fill="rgba(255,255,255,0.92)">NMA — Narrative Memory Agent</text>
+  <text x="44" y="66" font-size="12.5" fill="rgba(255,255,255,0.45)" letter-spacing="1.5">SYSTEM ARCHITECTURE · QWEN CLOUD GLOBAL AI HACKATHON 2026 · MEMORYAGENT TRACK</text>
 
-        <!-- =====================================================================
-             BOUNDARY BOXES
-             ===================================================================== -->
+  <!-- ============ QWEN CLOUD BAND (top right) ============ -->
+  <rect x="600" y="92" width="1016" height="112" rx="10" fill="rgba(251,191,36,0.05)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="7,5"/>
+  <text x="618" y="116" font-size="11" font-weight="600" fill="#fbbf24" letter-spacing="2">QWEN CLOUD</text>
+  <text x="1598" y="116" font-size="10.5" fill="rgba(251,191,36,0.65)" text-anchor="end" class="mono">dashscope-intl · OpenAI-compatible SDK</text>
 
-        <!-- Qwen Cloud Boundary -->
-        <rect x="590" y="20" width="430" height="160" rx="10"
-              fill="rgba(120, 53, 15, 0.06)" stroke="#fbbf24" stroke-width="1" stroke-dasharray="8,4"/>
-        <text x="600" y="38" fill="#fbbf24" font-size="10" font-weight="600">
-          Qwen Cloud Platform
-        </text>
+  <rect x="622" y="128" width="470" height="58" rx="8" fill="#131316" stroke="rgba(251,191,36,0.4)" stroke-width="1"/>
+  <text x="644" y="152" font-size="14" font-weight="600" fill="rgba(255,255,255,0.92)" class="mono">qwen3.6-flash</text>
+  <text x="644" y="172" font-size="11" fill="rgba(255,255,255,0.55)">Character voice generation · OOC scoring · Ingestion extraction</text>
 
-        <!-- FastAPI Backend Boundary -->
-        <rect x="30" y="210" width="600" height="550" rx="10"
-              fill="rgba(6, 78, 59, 0.06)" stroke="#34d399" stroke-width="1" stroke-dasharray="8,4"/>
-        <text x="40" y="228" fill="#34d399" font-size="10" font-weight="600">
-          FastAPI Backend (Python)
-        </text>
+  <rect x="1116" y="128" width="478" height="58" rx="8" fill="#131316" stroke="rgba(251,191,36,0.4)" stroke-width="1"/>
+  <text x="1138" y="152" font-size="14" font-weight="600" fill="rgba(255,255,255,0.92)" class="mono">text-embedding-v3</text>
+  <text x="1138" y="172" font-size="11" fill="rgba(255,255,255,0.55)">Event embeddings · Semantic-distance signal for validation</text>
 
-        <!-- Storage Boundary -->
-        <rect x="660" y="210" width="360" height="550" rx="10"
-              fill="rgba(76, 29, 149, 0.06)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="8,4"/>
-        <text x="670" y="228" fill="#a78bfa" font-size="10" font-weight="600">
-          Storage &amp; Vector Layer
-        </text>
+  <!-- ============ USER (top left, outside ECS) ============ -->
+  <rect x="44" y="92" width="240" height="112" rx="10" fill="#131316" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+  <text x="66" y="126" font-size="15" font-weight="600" fill="rgba(255,255,255,0.92)">User / Author</text>
+  <text x="66" y="150" font-size="11.5" fill="rgba(255,255,255,0.55)">Browser</text>
+  <text x="66" y="170" font-size="11.5" fill="rgba(255,255,255,0.55)">Uploads novel text · Asks characters</text>
 
-        <!-- =====================================================================
-             ROW 1: USER → FRONTEND → QWEN CLOUD (y=50-170)
-             ===================================================================== -->
+  <!-- User → Frontend -->
+  <path d="M 149 204 L 149 268" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.4" marker-end="url(#a-ink)"/>
+  <text x="162" y="242" font-size="10.5" fill="rgba(255,255,255,0.45)" class="mono">HTTPS</text>
 
-        <!-- User -->
-        <rect x="80" y="55" width="130" height="90" rx="8"
-              fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
-        <text x="145" y="88" fill="white" font-size="14" font-weight="600" text-anchor="middle">
-          User / Author
-        </text>
-        <text x="145" y="108" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Browser (Desktop)
-        </text>
-        <text x="145" y="122" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Upload novel
-        </text>
-        <text x="145" y="136" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Ask character
-        </text>
+  <!-- ============ ALIBABA CLOUD ECS BOUNDARY ============ -->
+  <rect x="44" y="272" width="1572" height="666" rx="12" fill="rgba(255,255,255,0.015)" stroke="rgba(255,255,255,0.2)" stroke-width="1" stroke-dasharray="7,5"/>
+  <text x="62" y="298" font-size="11" font-weight="600" fill="rgba(255,255,255,0.6)" letter-spacing="2">ALIBABA CLOUD ECS · DOCKER COMPOSE</text>
 
-        <!-- Arrow: User → Frontend -->
-        <line x1="210" y1="100" x2="278" y2="100" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
-        <text x="244" y="94" fill="#94a3b8" font-size="8" text-anchor="middle">HTTPS</text>
+  <!-- Frontend -->
+  <rect x="80" y="330" width="220" height="118" rx="10" fill="#131316" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+  <text x="102" y="362" font-size="15" font-weight="600" fill="rgba(255,255,255,0.92)">Frontend</text>
+  <text x="102" y="384" font-size="11.5" fill="rgba(255,255,255,0.55)">Next.js 16 · TypeScript</text>
+  <text x="102" y="404" font-size="11.5" fill="rgba(255,255,255,0.55)">Character UI · Profiles · Sleep view</text>
+  <text x="102" y="428" font-size="10.5" fill="rgba(255,255,255,0.35)" class="mono">:3000</text>
 
-        <!-- Frontend: Next.js -->
-        <rect x="280" y="55" width="180" height="90" rx="8"
-              fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
-        <text x="370" y="80" fill="white" font-size="13" font-weight="600" text-anchor="middle">
-          Frontend
-        </text>
-        <text x="370" y="98" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Next.js (TypeScript)
-        </text>
-        <text x="370" y="118" fill="#22d3ee" font-size="8" text-anchor="middle">
-          /ingest &bull; /ask &bull; /profile
-        </text>
-        <text x="370" y="134" fill="#22d3ee" font-size="8" text-anchor="middle">
-          Character UI &bull; Archive View
-        </text>
+  <!-- Frontend → Backend -->
+  <path d="M 300 389 L 366 389" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.4" marker-end="url(#a-ink)"/>
+  <text x="333" y="379" font-size="10.5" fill="rgba(255,255,255,0.45)" text-anchor="middle" class="mono">REST</text>
 
-        <!-- Arrow: Frontend → Backend -->
-        <line x1="460" y1="100" x2="615" y2="100" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow-emerald)"/>
-        <text x="538" y="94" fill="#94a3b8" font-size="8" text-anchor="middle">HTTP API</text>
+  <!-- ============ FASTAPI BACKEND BOUNDARY ============ -->
+  <rect x="370" y="312" width="742" height="596" rx="10" fill="rgba(255,255,255,0.01)" stroke="rgba(255,255,255,0.14)" stroke-width="1"/>
+  <text x="388" y="338" font-size="11" font-weight="600" fill="rgba(255,255,255,0.6)" letter-spacing="2">FASTAPI BACKEND · PYTHON 3.11</text>
+  <text x="1094" y="338" font-size="10.5" fill="rgba(255,255,255,0.35)" text-anchor="end" class="mono">:8000</text>
 
-        <!-- Qwen Cloud API -->
-        <rect x="617" y="50" width="180" height="95" rx="8"
-              fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="707" y="73" fill="white" font-size="12" font-weight="600" text-anchor="middle">
-          Qwen LLM API
-        </text>
-        <text x="707" y="91" fill="#94a3b8" font-size="9" text-anchor="middle">
-          qwen3.6-flash
-        </text>
-        <text x="707" y="105" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Text Embedding
-        </text>
-        <text x="707" y="119" fill="#fbbf24" font-size="8" text-anchor="middle">
-          OpenAI-compatible SDK
-        </text>
-        <text x="707" y="133" fill="#fbbf24" font-size="8" text-anchor="middle">
-          dashscope-intl
-        </text>
+  <!-- ---- API endpoints column ---- -->
+  <text x="398" y="372" font-size="10" font-weight="600" fill="rgba(255,255,255,0.4)" letter-spacing="1.5">API</text>
 
-        <!-- Arrow: Backend → Qwen API -->
-        <path d="M 615 145 Q 615 165 707 165 L 707 147"
-              fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow)"/>
-        <text x="690" y="160" fill="#94a3b8" font-size="8" text-anchor="end">LLM calls</text>
+  <!-- /ingest -->
+  <rect x="398" y="384" width="216" height="54" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="414" y="406" font-size="12" font-weight="500" fill="rgba(255,255,255,0.92)" class="mono">POST /ingest</text>
+  <text x="414" y="426" font-size="10.5" fill="rgba(255,255,255,0.5)">Novel text → characters &amp; events</text>
 
-        <!-- =====================================================================
-             ROW 2: BACKEND INTERNALS (y=250-720)
-             ===================================================================== -->
+  <!-- /ask -->
+  <rect x="398" y="450" width="216" height="54" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="414" y="472" font-size="12" font-weight="500" fill="rgba(255,255,255,0.92)" class="mono">POST /ask</text>
+  <text x="414" y="492" font-size="10.5" fill="rgba(255,255,255,0.5)">Question → scored options</text>
 
-        <!-- --- Left Panel: API Endpoints (x=50-230, y=255-560) --- -->
+  <!-- /feedback -->
+  <rect x="398" y="516" width="216" height="54" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="414" y="538" font-size="12" font-weight="500" fill="rgba(255,255,255,0.92)" class="mono">POST /feedback</text>
+  <text x="414" y="558" font-size="10.5" fill="rgba(255,255,255,0.5)">User choice + reason</text>
 
-        <!-- /ingest -->
-        <rect x="60" y="260" width="160" height="42" rx="6"
-              fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="140" y="280" fill="white" font-size="12" font-weight="600" text-anchor="middle">
-          POST /ingest
-        </text>
-        <text x="140" y="294" fill="#94a3b8" font-size="8" text-anchor="middle">
-          Novel text → Character distill
-        </text>
+  <!-- /profile -->
+  <rect x="398" y="582" width="216" height="54" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="414" y="604" font-size="12" font-weight="500" fill="rgba(255,255,255,0.92)" class="mono">GET /profile/{name}</text>
+  <text x="414" y="624" font-size="10.5" fill="rgba(255,255,255,0.5)">Cognitive profile</text>
 
-        <!-- /ask -->
-        <rect x="60" y="318" width="160" height="42" rx="6"
-              fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="140" y="338" fill="white" font-size="12" font-weight="600" text-anchor="middle">
-          POST /ask
-        </text>
-        <text x="140" y="352" fill="#94a3b8" font-size="8" text-anchor="middle">
-          Question → Options + OOC Score
-        </text>
+  <!-- /sleep -->
+  <rect x="398" y="648" width="216" height="54" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="414" y="670" font-size="12" font-weight="500" fill="rgba(255,255,255,0.92)" class="mono">POST /sleep/{name}</text>
+  <text x="414" y="690" font-size="10.5" fill="rgba(255,255,255,0.5)">Trigger consolidation</text>
 
-        <!-- /feedback (NEW) -->
-        <rect x="60" y="378" width="160" height="36" rx="6"
-              fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="140" y="396" fill="white" font-size="11" font-weight="600" text-anchor="middle">
-          POST /feedback
-        </text>
-        <text x="140" y="408" fill="#94a3b8" font-size="7" text-anchor="middle">
-          User marks → EMA update
-        </text>
+  <!-- /session -->
+  <rect x="398" y="714" width="216" height="54" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="414" y="736" font-size="12" font-weight="500" fill="rgba(255,255,255,0.92)" class="mono">GET·POST /session</text>
+  <text x="414" y="756" font-size="10.5" fill="rgba(255,255,255,0.5)">Cross-session resumption</text>
 
-        <!-- /profile -->
-        <rect x="60" y="426" width="160" height="42" rx="6"
-              fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="140" y="446" fill="white" font-size="12" font-weight="600" text-anchor="middle">
-          GET /profile/{name}
-        </text>
-        <text x="140" y="460" fill="#94a3b8" font-size="8" text-anchor="middle">
-          Character cognitive profile
-        </text>
+  <!-- /health -->
+  <rect x="398" y="780" width="216" height="40" rx="7" fill="transparent" stroke="rgba(255,255,255,0.09)"/>
+  <text x="414" y="805" font-size="11.5" fill="rgba(255,255,255,0.4)" class="mono">GET /health</text>
 
-        <!-- /sleep -->
-        <rect x="60" y="484" width="160" height="42" rx="6"
-              fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="140" y="504" fill="white" font-size="12" font-weight="600" text-anchor="middle">
-          POST /sleep/{name}
-        </text>
-        <text x="140" y="518" fill="#94a3b8" font-size="8" text-anchor="middle">
-          Offline memory consolidation
-        </text>
+  <!-- ---- Endpoint → component arrows (only where a drawn component exists) ---- -->
+  <!-- /ask → Circuit A -->
+  <path d="M 614 477 L 672 477" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" marker-end="url(#a-ink)"/>
+  <!-- /feedback → GenBias -->
+  <path d="M 614 543 L 640 543 L 640 700 L 672 700" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" marker-end="url(#a-ink)"/>
+  <!-- /sleep → Sleep service -->
+  <path d="M 614 675 L 630 675 L 630 806 L 672 806" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" marker-end="url(#a-ink)"/>
+  <!-- /session → Session service -->
+  <path d="M 614 741 L 622 741 L 622 862 L 672 862" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" marker-end="url(#a-ink)"/>
 
-        <!-- /health -->
-        <rect x="60" y="542" width="160" height="36" rx="6"
-              fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
-        <text x="140" y="564" fill="#94a3b8" font-size="10" text-anchor="middle">
-          GET /health
-        </text>
+  <!-- ---- Dual Circuit Engine column ---- -->
+  <text x="676" y="372" font-size="10" font-weight="600" fill="rgba(255,255,255,0.4)" letter-spacing="1.5">DUAL CIRCUIT ENGINE</text>
 
-        <!-- Arrow from API endpoints to Dual Circuit -->
-        <line x1="220" y1="281" x2="288" y2="281" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
-        <line x1="220" y1="339" x2="288" y2="339" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrow)"/>
-        <line x1="220" y1="429" x2="288" y2="429" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
-        <line x1="220" y1="505" x2="288" y2="505" stroke="#34d399" stroke-width="1" marker-end="url(#arrow)"/>
+  <!-- Circuit A -->
+  <rect x="676" y="384" width="404" height="98" rx="8" fill="#17171b" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+  <text x="696" y="410" font-size="14" font-weight="600" fill="rgba(255,255,255,0.92)">Circuit A · Creative Generation</text>
+  <text x="696" y="432" font-size="11.5" fill="rgba(255,255,255,0.55)">Role-play prompt from full character schema</text>
+  <text x="696" y="452" font-size="11.5" fill="rgba(255,255,255,0.55)">→ 2–5 distinct in-voice response options</text>
 
-        <!-- --- Center Panel: Dual Circuit + GenBias (x=290-470, y=255-640) --- -->
+  <!-- A → B -->
+  <path d="M 878 482 L 878 512" fill="none" stroke="rgba(255,255,255,0.55)" stroke-width="1.4" marker-end="url(#a-ink)"/>
+  <text x="892" y="502" font-size="10.5" fill="rgba(255,255,255,0.4)">options</text>
 
-        <!-- Section label -->
-        <text x="380" y="258" fill="#34d399" font-size="9" font-weight="600" text-anchor="middle">
-          ═══ Dual Circuit Engine ═══
-        </text>
+  <!-- Circuit B -->
+  <rect x="676" y="516" width="404" height="140" rx="8" fill="#17171b" stroke="rgba(255,255,255,0.18)" stroke-width="1.2"/>
+  <text x="696" y="542" font-size="14" font-weight="600" fill="rgba(255,255,255,0.92)">Circuit B · OOC Validation</text>
+  <text x="696" y="564" font-size="11.5" fill="rgba(255,255,255,0.55)">Five factors per option — D from real vector distance</text>
+  <text x="696" y="590" font-size="12" fill="#fbbf24" class="mono">Risk = 1 − (αT + βB + γ(1−D) + δC + εP)</text>
+  <text x="696" y="612" font-size="10.5" fill="rgba(255,255,255,0.45)" class="mono">Traits · Behaviour · Distance · Coherence · Surprise</text>
+  <text x="696" y="638" font-size="11.5" fill="rgba(255,255,255,0.55)">→ each option tagged fitting · surprising · OOC</text>
 
-        <!-- Circuit A -->
-        <rect x="290" y="268" width="180" height="82" rx="8"
-              fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
-        <text x="380" y="288" fill="#22d3ee" font-size="10" font-weight="600" text-anchor="middle">
-          Circuit A
-        </text>
-        <text x="380" y="304" fill="white" font-size="11" text-anchor="middle">
-          Creative Generation
-        </text>
-        <text x="380" y="320" fill="#94a3b8" font-size="8" text-anchor="middle">
-          Qwen role-play prompt
-        </text>
-        <text x="380" y="334" fill="#94a3b8" font-size="8" text-anchor="middle">
-          → 2-5 development options
-        </text>
+  <!-- GenBias -->
+  <rect x="676" y="672" width="404" height="70" rx="8" fill="#131316" stroke="rgba(255,255,255,0.14)"/>
+  <text x="696" y="698" font-size="13" font-weight="600" fill="rgba(255,255,255,0.92)">GenBias · Preference Learning</text>
+  <text x="696" y="720" font-size="11" fill="rgba(255,255,255,0.55)" class="mono">EMA over preferred [T,B,D,C,P] → bias prompt</text>
 
-        <!-- Arrow Circuit A → B -->
-        <line x1="380" y1="350" x2="380" y2="380" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
-        <text x="400" y="370" fill="#94a3b8" font-size="7">options</text>
+  <!-- GenBias → Circuit A (bias injection rail, dashed) -->
+  <path d="M 676 707 L 656 707 L 656 440 L 672 440" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#a-ink)"/>
+  <text x="668" y="430" font-size="10" fill="rgba(255,255,255,0.4)" text-anchor="end">bias</text>
 
-        <!-- Circuit B -->
-        <rect x="290" y="385" width="180" height="100" rx="8"
-              fill="rgba(76, 29, 149, 0.3)" stroke="#a78bfa" stroke-width="1.5"/>
-        <text x="380" y="405" fill="#a78bfa" font-size="10" font-weight="600" text-anchor="middle">
-          Circuit B
-        </text>
-        <text x="380" y="421" fill="white" font-size="11" text-anchor="middle">
-          OOC Validation
-        </text>
-        <text x="380" y="438" fill="#94a3b8" font-size="8" text-anchor="middle">
-          Multi-factor scoring formula
-        </text>
-        <text x="380" y="454" fill="#fbbf24" font-size="8" text-anchor="middle">
-          T &bull; B &bull; D &bull; C &bull; P
-        </text>
-        <text x="380" y="468" fill="#94a3b8" font-size="8" text-anchor="middle">
-          → OOC risk per option
-        </text>
+  <!-- Offline services -->
+  <text x="676" y="782" font-size="10" font-weight="600" fill="rgba(255,255,255,0.4)" letter-spacing="1.5">OFFLINE SERVICES</text>
 
-        <!-- OOC Formula annotation -->
-        <rect x="310" y="500" width="140" height="36" rx="4"
-              fill="rgba(120, 53, 15, 0.2)" stroke="#fbbf24" stroke-width="0.5" stroke-dasharray="3,3"/>
-        <text x="380" y="514" fill="#fbbf24" font-size="7" text-anchor="middle">
-          Risk = 1−(αT+βB+γ(1−D)+δC−εP)
-        </text>
-        <text x="380" y="528" fill="#94a3b8" font-size="7" text-anchor="middle">
-          T:Traits B:Behaviour D:Semantic C:Coherence P:Surprise
-        </text>
+  <rect x="676" y="792" width="404" height="46" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="696" y="812" font-size="12.5" font-weight="600" fill="rgba(255,255,255,0.92)">Sleep Consolidation</text>
+  <text x="696" y="830" font-size="10.5" fill="rgba(255,255,255,0.5)">NREM facts + conflicts · REM patterns + pruning · self-audit</text>
 
-        <!-- GenBias (Generation Bias) Panel -->
-        <rect x="290" y="553" width="180" height="52" rx="8"
-              fill="rgba(120, 53, 15, 0.25)" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="380" y="570" fill="#fbbf24" font-size="9" font-weight="600" text-anchor="middle">
-          GenBias (EMA)
-        </text>
-        <text x="380" y="584" fill="#94a3b8" font-size="7" text-anchor="middle">
-          User feedback → EMA profile update
-        </text>
-        <text x="380" y="596" fill="#94a3b8" font-size="7" text-anchor="middle">
-          preferred_profile [T,B,D,C,P] → bias_prompt
-        </text>
+  <rect x="676" y="848" width="404" height="46" rx="7" fill="#131316" stroke="rgba(255,255,255,0.12)"/>
+  <text x="696" y="868" font-size="12.5" font-weight="600" fill="rgba(255,255,255,0.92)">Session Resumption</text>
+  <text x="696" y="886" font-size="10.5" fill="rgba(255,255,255,0.5)">Snapshot &amp; restore working memory across sessions</text>
 
-        <!-- Arrow: /feedback → GenBias -->
-        <path d="M 220 396 L 255 396 L 255 578 L 288 578"
-              fill="none" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
-        <text x="255" y="390" fill="#fbbf24" font-size="7" text-anchor="middle">feedback</text>
+  <!-- ---- Engine → Qwen Cloud (egress) ---- -->
+  <path d="M 878 384 L 878 208" fill="none" stroke="#fbbf24" stroke-width="1.6" marker-end="url(#a-qwen)"/>
+  <path d="M 866 206 L 866 372" fill="none" stroke="#fbbf24" stroke-width="1.6" marker-end="url(#a-qwen)"/>
+  <text x="894" y="248" font-size="10.5" fill="#fbbf24" class="mono">chat + embeddings</text>
 
-        <!-- Arrow: GenBias → Circuit A (bias prompt injection) -->
-        <path d="M 290 566 L 266 566 L 266 340 L 288 340"
-              fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-amber)"/>
-        <text x="266" y="450" fill="#fbbf24" font-size="7" text-anchor="middle">bias prompt injection</text>
+  <!-- ============ STORAGE BOUNDARY ============ -->
+  <rect x="1160" y="312" width="428" height="596" rx="10" fill="rgba(74,222,128,0.025)" stroke="rgba(74,222,128,0.45)" stroke-width="1" stroke-dasharray="7,5"/>
+  <text x="1178" y="338" font-size="11" font-weight="600" fill="#4ade80" letter-spacing="2">STORAGE</text>
+  <text x="1570" y="338" font-size="10.5" fill="rgba(74,222,128,0.6)" text-anchor="end" class="mono">docker volume /app/data</text>
 
-        <!-- Output from Dual Circuit -->
-        <line x1="380" y1="605" x2="380" y2="638" stroke="#a78bfa" stroke-width="1" marker-end="url(#arrow-violet)"/>
-        <rect x="310" y="643" width="140" height="36" rx="6"
-              fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
-        <text x="380" y="662" fill="white" font-size="9" text-anchor="middle">
-          Response → User
-        </text>
-        <text x="380" y="674" fill="#94a3b8" font-size="7" text-anchor="middle">
-          Options + OOC scores + Feedback
-        </text>
+  <!-- Working Memory -->
+  <rect x="1188" y="360" width="372" height="88" rx="8" fill="#131316" stroke="rgba(255,255,255,0.14)"/>
+  <text x="1208" y="384" font-size="10" font-weight="600" fill="#4ade80" letter-spacing="1.5">MEMORY LAYER 1</text>
+  <text x="1208" y="408" font-size="13.5" font-weight="600" fill="rgba(255,255,255,0.92)">Working Memory</text>
+  <text x="1208" y="430" font-size="11" fill="rgba(255,255,255,0.5)">Per-character session buffer · attention routing</text>
 
-        <!-- Arrow back to API layer -->
-        <line x1="290" y1="661" x2="222" y2="661" stroke="#34d399" stroke-width="1" marker-end="url(#arrow-emerald)"/>
+  <!-- Episodic -->
+  <rect x="1188" y="464" width="372" height="88" rx="8" fill="#131316" stroke="rgba(255,255,255,0.14)"/>
+  <text x="1208" y="488" font-size="10" font-weight="600" fill="#4ade80" letter-spacing="1.5">MEMORY LAYER 2 · SQLITE</text>
+  <text x="1208" y="512" font-size="13.5" font-weight="600" fill="rgba(255,255,255,0.92)">Episodic Memory</text>
+  <text x="1208" y="534" font-size="11" fill="rgba(255,255,255,0.5)">Event timeline · Zwaan 5-dimension indexing</text>
 
-        <!-- --- Right Panel: Memory Layers + Schema Store + Vector Store (inside Storage Boundary) --- -->
+  <!-- Schema Store -->
+  <rect x="1188" y="568" width="372" height="88" rx="8" fill="#131316" stroke="rgba(255,255,255,0.14)"/>
+  <text x="1208" y="592" font-size="10" font-weight="600" fill="rgba(255,255,255,0.4)" letter-spacing="1.5">SQLITE · NOT A MEMORY LAYER</text>
+  <text x="1208" y="616" font-size="13.5" font-weight="600" fill="rgba(255,255,255,0.92)">Character Schema Store</text>
+  <text x="1208" y="638" font-size="11" fill="rgba(255,255,255,0.5)">Traits · motivation · arc stage · relationships</text>
 
-        <!-- Section label -->
-        <text x="840" y="258" fill="#a78bfa" font-size="9" font-weight="600" text-anchor="middle">
-          ═══ Memory Layers + Schema Store ═══
-        </text>
+  <!-- Vector Store -->
+  <rect x="1188" y="672" width="372" height="88" rx="8" fill="#131316" stroke="rgba(255,255,255,0.14)"/>
+  <text x="1208" y="696" font-size="10" font-weight="600" fill="rgba(255,255,255,0.4)" letter-spacing="1.5">CHROMADB · RETRIEVAL TOOL</text>
+  <text x="1208" y="720" font-size="13.5" font-weight="600" fill="rgba(255,255,255,0.92)">Vector Store</text>
+  <text x="1208" y="742" font-size="11" fill="rgba(255,255,255,0.5)">Embedding search → D factor in OOC scoring</text>
 
-        <!-- Working Memory -->
-        <rect x="700" y="270" width="280" height="50" rx="6"
-              fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
-        <text x="840" y="291" fill="white" font-size="11" font-weight="600" text-anchor="middle">
-          Working Memory
-        </text>
-        <text x="840" y="307" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Session context buffer &bull; ~10 turns &bull; Attention routing
-        </text>
-        <text x="700" y="248" fill="#22d3ee" font-size="8">Layer 1</text>
+  <!-- ---- Engine ↔ Storage main arrow ---- -->
+  <path d="M 1080 578 L 1184 578" fill="none" stroke="#4ade80" stroke-width="1.6" marker-end="url(#a-store)"/>
+  <path d="M 1188 556 L 1084 556" fill="none" stroke="#4ade80" stroke-width="1.6" marker-end="url(#a-store)"/>
+  <text x="1134" y="544" font-size="10.5" fill="#4ade80" text-anchor="middle" class="mono">context reads</text>
+  <text x="1134" y="596" font-size="10.5" fill="#4ade80" text-anchor="middle" class="mono">event writes</text>
 
-        <!-- Arrow: Working → Episodic -->
-        <line x1="840" y1="320" x2="840" y2="350" stroke="#22d3ee" stroke-width="1.5" marker-end="url(#arrow-cyan)"/>
+  <!-- ---- Offline → Storage (single dashed) ---- -->
+  <path d="M 1085 843 L 1130 843 L 1130 630 L 1184 630" fill="none" stroke="rgba(74,222,128,0.7)" stroke-width="1.3" stroke-dasharray="5,4" marker-end="url(#a-store)"/>
+  <text x="1146" y="758" font-size="10" fill="rgba(74,222,128,0.7)" transform="rotate(-90 1146 758)" text-anchor="middle">consolidated profile · session snapshots</text>
 
-        <!-- Episodic Memory -->
-        <rect x="700" y="355" width="280" height="60" rx="6"
-              fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
-        <text x="840" y="377" fill="white" font-size="11" font-weight="600" text-anchor="middle">
-          Episodic Memory
-        </text>
-        <text x="840" y="395" fill="#94a3b8" font-size="9" text-anchor="middle">
-          Event timeline &bull; Zwaan 5-dim index &bull; SQLite
-        </text>
-        <text x="700" y="333" fill="#34d399" font-size="8">Layer 2</text>
+  <!-- ============ LEGEND (bottom strip) ============ -->
+  <line x1="676" y1="958" x2="700" y2="958" stroke="#fbbf24" stroke-width="1.6"/>
+  <text x="708" y="962" font-size="11" fill="rgba(255,255,255,0.55)">Qwen Cloud call</text>
 
-        <!-- Character Schema Store (SQLite) -->
-        <rect x="700" y="450" width="280" height="60" rx="6"
-              fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1.5"/>
-        <text x="840" y="472" fill="white" font-size="11" font-weight="600" text-anchor="middle">
-          Character Schema Store
-        </text>
-        <text x="840" y="490" fill="#94a3b8" font-size="9" text-anchor="middle">
-          SQLite &bull; traits &bull; arc &bull; relations
-        </text>
-        <!-- Schema Store is not a memory layer — it is a persisted character profile store -->
+  <line x1="836" y1="958" x2="860" y2="958" stroke="#4ade80" stroke-width="1.6"/>
+  <text x="868" y="962" font-size="11" fill="rgba(255,255,255,0.55)">Persisted state</text>
 
-        <!-- Vector Store (ChromaDB) -->
-        <rect x="730" y="540" width="220" height="50" rx="6"
-              fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1.5"/>
-        <text x="840" y="560" fill="white" font-size="11" font-weight="600" text-anchor="middle">
-          Vector Store
-        </text>
-        <text x="840" y="576" fill="#94a3b8" font-size="9" text-anchor="middle">
-          ChromaDB &bull; Embedding similarity search
-        </text>
+  <line x1="994" y1="958" x2="1018" y2="958" stroke="rgba(255,255,255,0.55)" stroke-width="1.4"/>
+  <text x="1026" y="962" font-size="11" fill="rgba(255,255,255,0.55)">Request path</text>
 
-        <!-- Arrow: Semantic → Vector Store -->
-        <path d="M 840 510 Q 840 525 840 538"
-              fill="none" stroke="#fbbf24" stroke-width="1" marker-end="url(#arrow)"/>
+  <line x1="1144" y1="958" x2="1168" y2="958" stroke="rgba(255,255,255,0.45)" stroke-width="1.3" stroke-dasharray="5,4"/>
+  <text x="1176" y="962" font-size="11" fill="rgba(255,255,255,0.55)">Async / offline flow</text>
 
-        <!-- =====================================================================
-             INTERACTION ARROWS: Circuit B ↔ Memory
-             ===================================================================== -->
+  <text x="44" y="962" font-size="11" fill="rgba(255,255,255,0.35)" letter-spacing="1">TWO MEMORY LAYERS + SCHEMA STORE · VECTORS ARE A RETRIEVAL TOOL, NOT A LAYER</text>
+</svg>
+</div>
 
-        <!-- Circuit B → Semantic (traits lookup) -->
-        <path d="M 470 430 Q 540 430 620 430 Q 660 430 698 480"
-              fill="none" stroke="#a78bfa" stroke-width="1" marker-end="url(#arrow-violet)"/>
-        <text x="580" y="425" fill="#a78bfa" font-size="7" text-anchor="middle">traits</text>
-
-        <!-- Circuit B → Episodic (history lookup) -->
-        <path d="M 470 410 Q 540 410 620 410 Q 660 410 698 385"
-              fill="none" stroke="#34d399" stroke-width="1" marker-end="url(#arrow-emerald)"/>
-        <text x="580" y="405" fill="#34d399" font-size="7" text-anchor="middle">history</text>
-
-        <!-- Circuit B → Vector Store (embedding distance) -->
-        <path d="M 470 450 Q 600 450 730 565"
-              fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
-        <text x="600" y="463" fill="#fbbf24" font-size="7" text-anchor="middle">embedding</text>
-
-        <!-- =====================================================================
-             SLEEP CONSOLIDATION FLOW
-             ===================================================================== -->
-
-        <!-- Sleep cycle annotation -->
-        <rect x="60" y="640" width="160" height="80" rx="6"
-              fill="rgba(76, 29, 149, 0.15)" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,4"/>
-        <text x="140" y="658" fill="#a78bfa" font-size="8" font-weight="600" text-anchor="middle">
-          Sleep Cycle
-        </text>
-        <text x="140" y="674" fill="#94a3b8" font-size="7" text-anchor="middle">
-          ① Facts: episodic→semantic
-        </text>
-        <text x="140" y="688" fill="#94a3b8" font-size="7" text-anchor="middle">
-          ② REM: abstract+prune
-        </text>
-        <text x="140" y="702" fill="#94a3b8" font-size="7" text-anchor="middle">
-          ③ Self-inspection report
-        </text>
-
-        <path d="M 220 680 Q 260 680 290 680 L 290 705 Q 290 725 310 725 L 698 725"
-              fill="none" stroke="#a78bfa" stroke-width="1" stroke-dasharray="4,4" marker-end="url(#arrow-violet)"/>
-
-        <!-- =====================================================================
-             LEGEND
-             ===================================================================== -->
-        <text x="850" y="788" fill="white" font-size="10" font-weight="600">Legend</text>
-
-        <rect x="850" y="800" width="16" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
-        <text x="872" y="808" fill="#94a3b8" font-size="8">Frontend</text>
-
-        <rect x="850" y="816" width="16" height="10" rx="2" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1"/>
-        <text x="872" y="824" fill="#94a3b8" font-size="8">Backend</text>
-
-        <rect x="850" y="832" width="16" height="10" rx="2" fill="rgba(120, 53, 15, 0.3)" stroke="#fbbf24" stroke-width="1"/>
-        <text x="872" y="840" fill="#94a3b8" font-size="8">Cloud / LLM</text>
-
-        <rect x="850" y="848" width="16" height="10" rx="2" fill="rgba(76, 29, 149, 0.4)" stroke="#a78bfa" stroke-width="1"/>
-        <text x="872" y="856" fill="#94a3b8" font-size="8">Memory / DB</text>
-
-        <rect x="850" y="864" width="16" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
-        <text x="872" y="872" fill="#94a3b8" font-size="8">External</text>
-
-        <rect x="850" y="880" width="16" height="10" rx="2" fill="rgba(120, 53, 15, 0.25)" stroke="#fbbf24" stroke-width="1"/>
-        <text x="872" y="888" fill="#94a3b8" font-size="8">GenBias / Feedback</text>
-
-        <line x1="850" y1="896" x2="866" y2="896" stroke="#a78bfa" stroke-width="1" stroke-dasharray="3,3"/>
-        <text x="872" y="899" fill="#94a3b8" font-size="8">Flow</text>
-
-        <!-- =====================================================================
-             TITLE ANNOTATIONS
-             ===================================================================== -->
-
-        <!-- API Layer label -->
-        <text x="75" y="248" fill="#94a3b8" font-size="8">API Layer</text>
-
-        <!-- Right side titles -->
-        <text x="75" y="770" fill="#94a3b8" font-size="8">Offline</text>
-      </svg>
-    </div>
-
-    <!-- Info Cards -->
-    <div class="cards">
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot" style="background:#22d3ee"></div>
-          <h3>Tech Stack</h3>
-        </div>
-        <ul>
-          <li>&bull; Frontend: Next.js (TypeScript)</li>
-          <li>&bull; Backend: FastAPI (Python 3.11)</li>
-          <li>&bull; LLM: Qwen 3.6-flash via OpenAI SDK</li>
-          <li>&bull; Vector DB: ChromaDB (local)</li>
-          <li>&bull; Structured: SQLite (episodic events)</li>
-          <li>&bull; Embedding: Qwen text-embedding-v3</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot" style="background:#34d399"></div>
-          <h3>Dual Circuit Design</h3>
-        </div>
-        <ul>
-          <li>&bull; Circuit A: Creative generation (character voice)</li>
-          <li>&bull; Circuit B: Multi-factor OOC validation</li>
-          <li>&bull; OOC Formula: 5 factors (T/B/D/C/P)</li>
-          <li>&bull; P factor prevents "safe but boring" bias</li>
-          <li>&bull; GenBias: EMA learning from user feedback</li>
-        </ul>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-dot" style="background:#a78bfa"></div>
-          <h3>Two-Layer Memory + Schema Store</h3>
-        </div>
-        <ul>
-          <li>&bull; Layer 1: Working Memory (session buffer, persisted)</li>
-          <li>&bull; Layer 2: Episodic (Zwaan 5-dim indexed events)</li>
-          <li>&bull; Character Schema Store (SQLite: traits, arc, relations)</li>
-          <li>&bull; Vector Store (ChromaDB: embedding search for OOC D-score)</li>
-          <li>&bull; Sleep Cycle: facts→integration→pruning</li>
-          <li>&bull; Psychology-backed design (8 cited papers)</li>
-        </ul>
-      </div>
-    </div>
-
-    <p class="footer">
-      Narrative Memory Agent &bull; Qwen Cloud Global AI Hackathon 2026 &bull; Track 1: MemoryAgent &bull; MIT License
-    </p>
+<div class="cards">
+  <div class="card">
+    <h3>Tech Stack</h3>
+    <ul>
+      <li><b>Frontend</b> — Next.js 16, TypeScript</li>
+      <li><b>Backend</b> — FastAPI, Python 3.11</li>
+      <li><b>LLM</b> — <span class="m">qwen3.6-flash</span> via OpenAI SDK</li>
+      <li><b>Embeddings</b> — <span class="m">text-embedding-v3</span></li>
+      <li><b>Storage</b> — SQLite + ChromaDB</li>
+      <li><b>Deploy</b> — Docker Compose on Alibaba Cloud ECS</li>
+    </ul>
   </div>
+  <div class="card">
+    <h3>Dual Circuit Engine</h3>
+    <ul>
+      <li><b>Circuit A</b> generates 2–5 in-voice options</li>
+      <li><b>Circuit B</b> scores each on five OOC factors</li>
+      <li><b>D factor</b> uses real embedding distance, not LLM self-report</li>
+      <li><b>P factor</b> prevents "safe but boring" collapse</li>
+      <li><b>GenBias</b> — EMA learning from user feedback</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3>Memory Design</h3>
+    <ul>
+      <li><b>Layer 1</b> — Working Memory, persisted per character</li>
+      <li><b>Layer 2</b> — Episodic events, Zwaan 5-dim indexed</li>
+      <li><b>Schema Store</b> — traits, arc, relationships</li>
+      <li><b>Sleep cycle</b> — NREM · REM · self-audit → schema updates</li>
+      <li>Grounded in 8 cited cognitive-psychology papers</li>
+    </ul>
+  </div>
+</div>
+
+<p class="footer">Narrative Memory Agent · Qwen Cloud Global AI Hackathon 2026 · Track 1: MemoryAgent · MIT License</p>
+
+</div>
 </body>
 </html>

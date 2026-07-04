@@ -32,7 +32,8 @@ The system works with **any fiction**. A fresh install comes pre-loaded with Eli
 
 ## 🏗 Architecture
 
-📐 **Interactive architecture diagram:** [English](docs/architecture.en.html) · [中文](docs/architecture.zh.html) *(download and open in a browser)*
+📐 Full diagram: [docs/architecture.en.html](docs/architecture.en.html) *(download and open in a browser)* — or see the PNG below.
+![NMA Architecture](docs/images/architecture-en.png)
 
 The system has two active memory layers plus a character schema store:
 
@@ -40,10 +41,10 @@ The system has two active memory layers plus a character schema store:
 User/Browser → Next.js Frontend → FastAPI Backend → Qwen Cloud LLM
                                         │
                               ┌─────────┴──────────┐
-                              │   Dual Circuit      │
-                              │  A: Generation      │
-                              │  B: OOC Validation  │
-                              │  ↻ GenBias (EMA)    │
+                              │   Dual Circuit     │
+                              │  A: Generation     │
+                              │  B: OOC Validation │
+                              │  ↻ GenBias (EMA)   │
                               └─────────┬──────────┘
                                         │
                     ┌───────────────────┼───────────────────┐
@@ -171,8 +172,7 @@ narrative-memory-agent/
 │       ├── components/    # UI components
 │       └── lib/           # API adapter, types, demo data
 ├── docs/
-│   ├── architecture.en.html  # Interactive architecture diagram (English)
-│   ├── architecture.zh.html  # Interactive architecture diagram (Chinese)
+│   ├── architecture.en.html  # Architecture diagram (open in browser / screenshot source)
 │   ├── project-description.md # Devpost submission description
 │   └── tech-stack.md         # Technology stack overview
 ├── Dockerfile.backend
