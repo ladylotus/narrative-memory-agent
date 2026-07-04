@@ -11,7 +11,7 @@ NMA gives fictional characters **persistent memory**. It reads novel text, build
 
 Unlike generic chatbots or writing assistants, NMA treats each character as a unique cognitive entity with evolving traits, behavioral patterns, a relationship network, and a remembered conversation history across sessions.
 
-The system works with **any fiction** — pre-loaded demo data includes characters from two novels (Jane Austen's *Pride and Prejudice* and the original Caelvorn Series) to show it handles both canonical literary figures and original creations equally well.
+The system works with **any fiction**. A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy from Jane Austen's *Pride and Prejudice*; additional characters — like Lena and Caelan Ashmark from the original Caelvorn Series shown in the demo video — are created live through the ingestion pipeline, demonstrating that the same architecture handles both canonical literary figures and original creations equally well. (The Caelvorn Series is the author's own serialized novel — NMA is dogfooded against the exact memory-drift problem it was built to solve.)
 
 ---
 
@@ -19,7 +19,7 @@ The system works with **any fiction** — pre-loaded demo data includes characte
 
 | Feature | What it does |
 |---------|-------------|
-| **Ingest & Extract** | Paste novel chapters — NMA identifies characters, events, and relationships, then builds a 3-layer memory |
+| **Ingest & Extract** | Paste novel chapters — NMA identifies characters, events, and relationships, then builds each character's memory (working + episodic layers and a schema store) |
 | **Ask a Character** | Query any character in their authentic voice. NMA generates 2-5 distinct development paths |
 | **OOC Validation** | Every response is scored on 5 factors: Trait consistency, Behavior patterns, Semantic distance, Self-consistency, and Surprise. Violations and surprises are flagged with a risk level |
 | **GenBias Learning** | When you mark a response as "what they'd do", NMA learns your preference via EMA (Exponential Moving Average) and biases future generations accordingly |
@@ -32,7 +32,7 @@ The system works with **any fiction** — pre-loaded demo data includes characte
 
 ## 🏗 Architecture
 
-![Architecture Diagram](docs/architecture.en.html)
+📐 **Interactive architecture diagram:** [English](docs/architecture.en.html) · [中文](docs/architecture.zh.html) *(download and open in a browser)*
 
 The system has two active memory layers plus a character schema store:
 
@@ -161,7 +161,7 @@ narrative-memory-agent/
 ├── backend/
 │   ├── app/
 │   │   ├── api/           # FastAPI route handlers
-│   │   ├── memory/        # 3-layer memory (working/episodic/vectors)
+│   │   ├── memory/        # Memory layers (working/episodic) + vector search tool
 │   │   ├── models/        # Data models (Pydantic + dataclasses)
 │   │   └── services/      # Core services (generation/validation/bias/decay/sleep)
 │   └── tests/             # 124 unit tests

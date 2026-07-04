@@ -13,13 +13,13 @@
 - **Decay Service:** Time-based memory decay (`decay.py`) — recall_score formula, auto-archiving
 
 ## AI / LLM
-- **Generation Model:** Qwen 3.6-plus (dashscope-intl)
+- **Generation Model:** Qwen 3.6-flash (dashscope-intl)
 - **Embedding Model:** Qwen text-embedding-v3
 - **Integration:** OpenAI-compatible SDK (AsyncOpenAI)
 
 ## Testing
-- **Framework:** pytest 9.0 + pytest-asyncio
-- **Coverage:** 94 unit tests (bias, decay, validation, bias_prompt, API, sleep)
+- **Framework:** pytest (>=8.0) + pytest-asyncio
+- **Coverage:** 124 unit tests (bias, decay, validation, bias_prompt, API, sleep)
 
 ## Deployment
 - **Containerization:** Docker (multi-stage builds)

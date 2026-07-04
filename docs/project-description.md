@@ -10,11 +10,11 @@ Every fictional character faces the same problem: close the window, and they for
 
 NMA ingests novel text and builds a cognitive profile for each character — traits, behavior patterns, motivation, arc stage, and relationships. You ask a character a question, and NMA generates 2-5 distinct responses in that character's voice, each scored for how in-character it is. Pick one, and the system learns from your choice.
 
-The system comes pre-loaded with four characters across two novels — Elizabeth Bennet and Fitzwilliam Darcy from *Pride and Prejudice*, and Lena and Caelan Ashmark from an original Caelvorn Series work — demonstrating that the same architecture works for both canonical literary figures and original creations.
+A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy from *Pride and Prejudice*. The Caelvorn Series characters shown in the demo — Lena and Caelan Ashmark — were not seeded by script: they were created live through the ingestion pipeline from original novel text, demonstrating that the same architecture works for both canonical literary figures and original creations.
 
 ## How It Works
 
-**Dual Circuit Engine.** Circuit A (Generation) prompts Qwen 3.6-plus with the character's full profile — backstory, traits, motivation, arc stage — to produce diverse responses. Circuit B (Validation) scores each option on five OOC factors: trait consistency, behavior patterns, semantic distance (from real ChromaDB embeddings, not LLM-estimated), self-consistency, and surprise value. Options are classified as fitting, surprising, or out-of-character.
+**Dual Circuit Engine.** Circuit A (Generation) prompts Qwen 3.6-flash with the character's full profile — backstory, traits, motivation, arc stage — to produce diverse responses. Circuit B (Validation) scores each option on five OOC factors: trait consistency, behavior patterns, semantic distance (from real ChromaDB embeddings, not LLM-estimated), self-consistency, and surprise value. Options are classified as fitting, surprising, or out-of-character.
 
 **Two Memory Layers + Schema Store.** Working Memory buffers current conversation context and persists to SQLite for cross-session recall. Episodic Memory stores a Zwaan-indexed event timeline that decays over time — low-importance memories are archived during Sleep. The Character Schema Store (SQLite `characters` table) holds traits, behavior patterns, arc stage, motivation, and relationships — written by Ingestion and Sleep, read by Circuit A for generation. A separate Vector Store (ChromaDB) provides embedding similarity search for the OOC validation D-score (semantic distance), but is not a memory layer.
 
@@ -28,11 +28,13 @@ The system comes pre-loaded with four characters across two novels — Elizabeth
 
 For readers who have invested hundreds of pages only to watch characters act inconsistently across sequels — consistency isn't a nice-to-have, it's the foundation of an immersive world. For authors managing multi-book series or sprawling casts where every character needs to stay internally coherent. For anyone building AI characters — in games, interactive fiction, or virtual worlds — who needs them to feel like real people with real memories, not scripts that replay on every visit.
 
+This problem is not hypothetical for me. I write and serialize English-language fiction on Dreame (the Caelvorn Series — Book 1 complete), and memory drift and out-of-character moments across a long narrative are problems I fight as an author every week. NMA's memory architecture comes directly out of that practice — which is why the demo characters Lena and Caelan Ashmark are ingested from my own novel: the system is being tested against the exact problem it was built to solve.
+
 ## Tech Stack
 
 | Category | Technology |
 |----------|-----------|
-| **LLM** | Qwen 3.6-plus (generation + OOC evaluation) |
+| **LLM** | Qwen 3.6-flash (generation + OOC evaluation) |
 | **Embedding** | Qwen text-embedding-v3 |
 | **Backend** | FastAPI (Python 3.11) |
 | **Frontend** | Next.js 16 (TypeScript) |
