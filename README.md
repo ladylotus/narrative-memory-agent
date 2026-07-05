@@ -34,9 +34,9 @@ The system works with **any fiction**. A fresh install comes pre-loaded with Eli
 
 **Ingest a novel.** Paste raw chapter text — NMA chunks it, extracts characters, events, and relationships, and is honest about the work in progress:
 
-![Ingesting novel text with live progress](docs/images/screenshot-novel-2.png)
+![Ingesting novel text with live progress](docs/images/screenshot-novel-1.png)
 
-![Analysis complete — characters identified](docs/images/screenshot-novel-1.png)
+![Analysis complete — characters identified](docs/images/screenshot-novel-2.png)
 
 **Ask a character.** Each question produces multiple in-voice response paths, scored by the OOC validation circuit — note the resumption banner: the character remembers the previous session:
 
@@ -52,7 +52,7 @@ The system works with **any fiction**. A fresh install comes pre-loaded with Eli
 
 **And it sticks.** The extracted behavioral patterns persist to the character's cognitive profile:
 
-![Cognitive profile with extracted behavior patterns](docs/images/screenshot-mira-4.png)
+![Cognitive profile with extracted behavior patterns](docs/images/screenshot-mira-5.png)
 
 ---
 
