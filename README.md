@@ -11,7 +11,7 @@ NMA gives fictional characters **persistent memory**. It reads novel text, build
 
 Unlike generic chatbots or writing assistants, NMA treats each character as a unique cognitive entity with evolving traits, behavioral patterns, a relationship network, and a remembered conversation history across sessions.
 
-The system works with **any fiction**. A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy from Jane Austen's *Pride and Prejudice*; additional characters — like Lena and Caelan Ashmark from the original Caelvorn Series shown in the demo video — are created live through the ingestion pipeline, demonstrating that the same architecture handles both canonical literary figures and original creations equally well. (The Caelvorn Series is the author's own serialized novel — NMA is dogfooded against the exact memory-drift problem it was built to solve.)
+The system works with **any fiction**. A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy from Jane Austen's *Pride and Prejudice*; further characters enter through the ingestion pipeline — paste raw novel text and NMA builds their cognitive profiles. The demo's Lena and Caelan Ashmark are from the original Caelvorn Series, showing the same architecture handles both canonical literary figures and original creations equally well. (The Caelvorn Series is the author's own serialized novel — NMA is dogfooded against the exact memory-drift problem it was built to solve.)
 
 ---
 
