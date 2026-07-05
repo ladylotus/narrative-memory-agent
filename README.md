@@ -30,6 +30,32 @@ The system works with **any fiction**. A fresh install comes pre-loaded with Eli
 
 ---
 
+## 📸 See It Work
+
+**Ingest a novel.** Paste raw chapter text — NMA chunks it, extracts characters, events, and relationships, and is honest about the work in progress:
+
+![Ingesting novel text with live progress](docs/images/screenshot-novel-2.png)
+
+![Analysis complete — characters identified](docs/images/screenshot-novel-1.png)
+
+**Ask a character.** Each question produces multiple in-voice response paths, scored by the OOC validation circuit — note the resumption banner: the character remembers the previous session:
+
+![Scored response options with cross-session resumption](docs/images/screenshot-mira-1.png)
+
+**Let them sleep.** A consolidation cycle runs NREM fact extraction, REM pattern abstraction, and a self-audit:
+
+![Sleep consolidation report](docs/images/screenshot-mira-2.png)
+
+**Watch them grow.** After sleep, the same question yields a response tagged *Surprising* — self-reflection that never appeared before consolidation. No template, no instruction; the consolidated memory is simply present in her context:
+
+![Post-sleep response with emergent self-reflection](docs/images/screenshot-mira-3.png)
+
+**And it sticks.** The extracted behavioral patterns persist to the character's cognitive profile:
+
+![Cognitive profile with extracted behavior patterns](docs/images/screenshot-mira-4.png)
+
+---
+
 ## 🏗 Architecture
 
 📐 Full diagram: [docs/architecture.en.html](docs/architecture.en.html) *(download and open in a browser)* — or see the PNG below.
