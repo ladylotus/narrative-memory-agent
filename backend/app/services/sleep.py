@@ -417,7 +417,9 @@ class SleepService:
             return 0
 
         ids = raw.get("ids", [])
-        embeddings = raw.get("embeddings") or []
+        embeddings = raw.get("embeddings")
+        if embeddings is None:
+            embeddings = []
         metadatas = raw.get("metadatas", [])
         if not ids or len(ids) < 2:
             return 0
