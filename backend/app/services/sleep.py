@@ -443,7 +443,7 @@ class SleepService:
                 # L2 distance between embeddings
                 emb_i = embeddings[i]
                 emb_j = embeddings[j]
-                if not emb_i or not emb_j:
+                if emb_i is None or emb_j is None:
                     continue
                 dist = sum((a - b) ** 2 for a, b in zip(emb_i, emb_j)) ** 0.5
                 if dist >= _PRUNE_DISTANCE_THRESHOLD:
