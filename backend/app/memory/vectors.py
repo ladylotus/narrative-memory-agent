@@ -50,7 +50,9 @@ class VectorStore:
 
         Returns dict with keys: ids, embeddings, metadatas, documents.
         """
-        return self._collection(collection).get(where=where)
+        return self._collection(collection).get(
+            where=where, include=["embeddings", "metadatas", "documents"]
+        )
 
     def search(
         self,
