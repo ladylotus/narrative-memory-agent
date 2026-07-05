@@ -40,23 +40,33 @@ def save_session_state(
     Called automatically when switching characters or before sleep.
     If working_memory is None, only the question/preferred_profile are saved.
     """
-    turns: list[dict[str, str]] = []
+    # Partial saves must not destroy existing state: any field the caller
+    # does not provide is preserved from the stored row (previously, a
+    # feedback-path save wiped turns/last_question, producing the
+    # contradictory "0 previous exchanges remembered" resumption banner).
+    existing: dict[str, Any] = {}
+    if (working_memory is None or question is None or options_json is None
+            or preferred_profile is None):
+        existing = load_session_state(character) or {}
+
     if working_memory is not None:
         turns = [
             {"role": t.role, "content": t.content}
             for t in working_memory.get_context()
         ]
+    else:
+        turns = existing.get("turns") or []
+
     data: dict[str, Any] = {
         "character": character,
         "turns": turns,
-        "last_question": question or "",
+        "last_question": question if question is not None else existing.get("last_question", ""),
     }
-    if options_json is not None:
-        data["last_options"] = options_json
+    data["last_options"] = options_json if options_json is not None else existing.get("last_options")
     if conversation_history is not None:
         data["conversation_history"] = conversation_history
-    if preferred_profile is not None:
-        data["preferred_profile"] = preferred_profile
+    data["preferred_profile"] = (preferred_profile if preferred_profile is not None
+                                 else existing.get("preferred_profile"))
 
     upsert_session_state(data)
 
