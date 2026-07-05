@@ -99,7 +99,7 @@ For a full interactive diagram, open `docs/architecture.en.html` in a browser.
 ### Prerequisites
 
 - Docker & docker-compose (recommended), or Python 3.11+ / Node.js 20+
-- A Qwen Cloud API key ([get one here](https://dashscope-intl.aliyuncs.com/))
+- A Qwen Cloud API key ([get one here](https://dashscope-intl.aliyuncs.com/) — a free tier is available, and `qwen3.6-flash` is inexpensive beyond it)
 
 ### Docker (recommended)
 
