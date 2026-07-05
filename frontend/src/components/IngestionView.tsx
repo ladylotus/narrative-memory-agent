@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ingestNovel } from "@/lib/api";
 import type { IngestResult } from "@/lib/api";
 
@@ -14,6 +14,18 @@ export default function IngestionView({
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<IngestResult | null>(null);
   const [error, setError] = useState("");
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    if (!loading) return;
+    setElapsed(0);
+    const t = setInterval(() => setElapsed((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [loading]);
+
+  const charCount = text.length;
+  const estChunks = Math.max(1, Math.ceil(charCount / 3000));
+  const isLong = charCount > 12000;
 
   const handleAnalyze = async () => {
     if (!text.trim()) return;
@@ -40,7 +52,7 @@ export default function IngestionView({
         <div className="page-head">
           <div className="page-title">📖 Reading Room</div>
           <div className="page-desc">
-            Paste novel text — I'll analyze characters, events, and relationships, then build a three-layer memory.
+            Paste novel text — I'll analyze characters, events, and relationships, then build each character's memory and cognitive profile.
           </div>
         </div>
 
@@ -72,6 +84,16 @@ export default function IngestionView({
               value={text}
               onChange={(e) => setText(e.target.value)}
             />
+            <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12, color: "rgba(255,255,255,0.45)" }}>
+              <span>
+                {charCount.toLocaleString()} characters · ~{estChunks} chunk{estChunks > 1 ? "s" : ""} · one Qwen call per chunk
+              </span>
+              {isLong && (
+                <span style={{ color: "#facc15" }}>
+                  ⚠ Long text — splitting into ~10,000-character submissions is faster and safer
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="settings-row" style={{ justifyContent: "flex-end", paddingTop: 4 }}>
@@ -142,9 +164,14 @@ export default function IngestionView({
 
         {/* Loading state */}
         {loading && (
-          <div className="ingest-thinking fadein">
-            <span className="pulse"><i /><i /><i /></span>
-            <span>🔮 Reading text, extracting characters and events…</span>
+          <div className="ingest-thinking fadein" style={{ flexDirection: "column", alignItems: "flex-start", gap: 6 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="pulse"><i /><i /><i /></span>
+              <span>🔮 Reading text — {estChunks} chunk{estChunks > 1 ? "s" : ""}, extracting characters and events… {elapsed}s</span>
+            </div>
+            <span style={{ fontSize: 12, color: "rgba(255,255,255,0.45)", paddingLeft: 2 }}>
+              Each chunk is one LLM pass — longer texts take a few minutes. Keep this tab open; don't refresh.
+            </span>
           </div>
         )}
       </div>
