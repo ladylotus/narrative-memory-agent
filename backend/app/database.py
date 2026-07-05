@@ -39,6 +39,7 @@ def _init_db(conn: sqlite3.Connection) -> None:
             backstory   TEXT NOT NULL DEFAULT '',
             embedding_centroid TEXT,                  -- JSON float array
             preferred_profile  TEXT,                  -- JSON [T,B,D,C,P] for Generation Bias
+            last_sleep_report  TEXT DEFAULT '',       -- JSON of most recent consolidation report
             created_at  TEXT DEFAULT (datetime('now')),
             updated_at  TEXT DEFAULT (datetime('now'))
         );
@@ -66,6 +67,13 @@ def _init_db(conn: sqlite3.Connection) -> None:
     # Migration: add conversation_history for existing production DBs
     try:
         conn.execute("ALTER TABLE session_state ADD COLUMN conversation_history TEXT DEFAULT '[]'")
+        conn.commit()
+    except Exception:
+        pass
+
+    # Migration: add last_sleep_report for DBs created before the column existed
+    try:
+        conn.execute("ALTER TABLE characters ADD COLUMN last_sleep_report TEXT DEFAULT ''")
         conn.commit()
     except Exception:
         pass
