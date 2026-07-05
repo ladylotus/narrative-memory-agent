@@ -40,6 +40,7 @@ def _init_db(conn: sqlite3.Connection) -> None:
             embedding_centroid TEXT,                  -- JSON float array
             preferred_profile  TEXT,                  -- JSON [T,B,D,C,P] for Generation Bias
             last_sleep_report  TEXT DEFAULT '',       -- JSON of most recent consolidation report
+            behavior_patterns  TEXT NOT NULL DEFAULT '[]',  -- JSON list from REM extraction
             created_at  TEXT DEFAULT (datetime('now')),
             updated_at  TEXT DEFAULT (datetime('now'))
         );
@@ -78,6 +79,13 @@ def _init_db(conn: sqlite3.Connection) -> None:
     except Exception:
         pass
 
+    # Migration: add behavior_patterns (REM extraction was previously discarded on save)
+    try:
+        conn.execute("ALTER TABLE characters ADD COLUMN behavior_patterns TEXT NOT NULL DEFAULT '[]'")
+        conn.commit()
+    except Exception:
+        pass
+
 
 # ──────────────────────────────────────────────
 #  Character CRUD
@@ -100,8 +108,9 @@ def upsert_character(data: dict[str, Any]) -> None:
         """
         INSERT INTO characters
             (name, aliases, traits, relations, motivation, arc_stage,
-             backstory, embedding_centroid, preferred_profile, last_sleep_report, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
+             backstory, embedding_centroid, preferred_profile, last_sleep_report,
+             behavior_patterns, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))
         ON CONFLICT(name) DO UPDATE SET
             aliases           = excluded.aliases,
             traits            = excluded.traits,
@@ -112,6 +121,7 @@ def upsert_character(data: dict[str, Any]) -> None:
             embedding_centroid = excluded.embedding_centroid,
             preferred_profile  = excluded.preferred_profile,
             last_sleep_report  = excluded.last_sleep_report,
+            behavior_patterns  = excluded.behavior_patterns,
             updated_at        = datetime('now')
         """,
         (
@@ -125,6 +135,7 @@ def upsert_character(data: dict[str, Any]) -> None:
             row["embedding_centroid"],
             row["preferred_profile"],
             row.get("last_sleep_report", ""),
+            row.get("behavior_patterns", "[]"),
         ),
     )
     conn.commit()
@@ -219,7 +230,7 @@ def delete_session_state(character: str) -> None:
 def _serialise(data: dict[str, Any]) -> dict[str, Any]:
     """Convert Python objects to JSON strings for SQLite storage."""
     out = dict(data)
-    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options", "conversation_history"):
+    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "behavior_patterns", "turns", "last_options", "conversation_history"):
         if key in out and not isinstance(out.get(key), str):
             out[key] = json.dumps(out[key], ensure_ascii=False)
     return out
@@ -228,7 +239,7 @@ def _serialise(data: dict[str, Any]) -> dict[str, Any]:
 def _deserialise(row: dict[str, Any]) -> dict[str, Any]:
     """Convert JSON strings back to Python objects."""
     out = dict(row)
-    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "turns", "last_options", "conversation_history"):
+    for key in ("aliases", "traits", "relations", "embedding_centroid", "preferred_profile", "behavior_patterns", "turns", "last_options", "conversation_history"):
         val = out.get(key)
         if val and isinstance(val, str):
             try:

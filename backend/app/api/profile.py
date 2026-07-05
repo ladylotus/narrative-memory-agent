@@ -24,6 +24,7 @@ async def get_profile(character_name: str):
         "motivation": profile.get("motivation", ""),
         "arc_stage": profile.get("arc_stage", "unknown"),
         "backstory": profile.get("backstory", ""),
+        "patterns": profile.get("behavior_patterns", []),
     }
 
 

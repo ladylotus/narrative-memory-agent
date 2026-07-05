@@ -205,7 +205,13 @@ export async function fetchProfile(name: string): Promise<FrontendProfile | null
       evidence: 0, // backend doesn't track evidence count yet
       isNew: false,
     })),
-    patterns: [], // backend doesn't have behavior patterns yet
+    patterns: ((data as { patterns?: Array<{ condition?: string; behavior?: string; confidence?: number }> }).patterns ?? [])
+      .filter((p) => (p.behavior ?? "").trim() && (p.condition ?? "").trim())
+      .map((p) => ({
+      cond: p.condition ?? "",
+      body: p.behavior ?? "",
+      strength: Math.max(1, Math.min(4, Math.round((p.confidence ?? 0.3) * 4))),
+    })),
     relationships: Object.entries(data.relations).map(([name, rel], i) => ({
       id: `rel_${i}`,
       name,
