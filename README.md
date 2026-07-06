@@ -136,6 +136,8 @@ npm run dev
 
 Pick a character, ask a question, and see NMA generate options scored by OOC risk. Mark what fits, and GenBias learns your preference. Switch characters or refresh the page — the memory persists. Run Sleep Consolidation to watch the agent abstract events into evolving traits.
 
+▶️ [Watch the Demo on YouTube](https://www.youtube.com/watch?v=yA-L8rPAqzM)
+
 ---
 
 ## 🧠 How It Works
