@@ -1,12 +1,13 @@
 # —— Frontend: Next.js standalone ——
 FROM node:20-alpine AS builder
 ARG NEXT_PUBLIC_API_URL
+ARG USE_NPM_MIRROR
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 WORKDIR /app
 
-# Use npm mirror for faster install
-RUN npm config set registry https://registry.npmmirror.com
+# Use npm mirror only when explicitly set (e.g., --build-arg USE_NPM_MIRROR=1)
+RUN if [ "$USE_NPM_MIRROR" = "1" ]; then npm config set registry https://registry.npmmirror.com; fi
 
 # Install deps (--no-audit --no-fund to avoid slow security audit)
 COPY package.json package-lock.json* ./
