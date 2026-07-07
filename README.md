@@ -98,7 +98,7 @@ For a full interactive diagram, open `docs/architecture.en.html` in a browser.
 
 ### Prerequisites
 
-- Docker & docker-compose (recommended), or Python 3.11+ / Node.js 20+
+- Docker & docker compose (recommended), or Python 3.11+ / Node.js 20+
 - A Qwen Cloud API key ([get one here](https://dashscope-intl.aliyuncs.com/) — a free tier is available, and `qwen3.6-flash` is inexpensive beyond it)
 
 ### Docker (recommended)
@@ -179,7 +179,7 @@ Inspired by human memory consolidation (Walker & Stickgold, 2010):
 | **Embedding** | Qwen text-embedding-v3 | Semantic similarity for OOC distance scoring |
 | **Vector Store** | ChromaDB | Embedding storage and similarity search |
 | **Database** | SQLite | Episodic events, character schemas, session state |
-| **Deployment** | Docker / docker-compose | Containerized backend + frontend |
+| **Deployment** | Docker / docker compose | Containerized backend + frontend |
 
 ---
 

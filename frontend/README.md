@@ -21,20 +21,24 @@ Requires the backend running on `http://localhost:8000`.
 ## Architecture
 
 ```
-pages/
-├── page.tsx          # Main app shell — character selection, routing, state
+src/
+├── app/                   # App Router pages
+│   ├── layout.tsx
+│   ├── page.tsx           # Main app shell — character selection, routing, state
+│   └── globals.css
 ├── components/
-│   ├── Sidebar       # Character list + nav
-│   ├── ConversationView  # Chat UI: options, feedback, history
-│   ├── ProfileView   # Character cognitive profile display
-│   ├── SleepLogView  # Sleep consolidation report
-│   ├── IngestionView # Novel text import
-│   ├── SettingsView  # User preferences
-│   └── ErrorToast    # Unified error handling
+│   ├── Sidebar            # Character list + nav
+│   ├── ConversationView   # Chat UI: options, feedback, history
+│   ├── ProfileView        # Character cognitive profile display
+│   ├── SleepLogView       # Sleep consolidation report
+│   ├── IngestionView      # Novel text import
+│   ├── SettingsView       # User preferences
+│   └── ErrorToast         # Unified error handling
 └── lib/
-    ├── api.ts        # Backend API adapter
-    ├── data.ts       # Demo character data
-    └── types.ts      # Shared TypeScript types
+    ├── api.ts             # Backend API adapter
+    ├── data.ts            # Demo character data
+    ├── types.ts           # Shared TypeScript types
+    └── sleep-types.ts     # Sleep report types
 ```
 
 ## Key Concepts
