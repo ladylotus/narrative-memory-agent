@@ -1,17 +1,19 @@
 # Narrative Memory Agent
 
-**An AI-powered cognitive memory system for fictional characters.**  
+**Fictional people live on the other side of the page. You were never meant to reach them.**  
 *Qwen Cloud Global AI Hackathon 2026 — Track 1: MemoryAgent*
 
 ---
 
 ## 📖 What is NMA?
 
-NMA gives fictional characters **persistent memory**. It reads novel text, builds a cognitive profile for each character, and lets you ask "what would this character do?" — generating responses in that character's authentic voice, validated against their established personality.
+There are characters you finish a book and can't put down — who feel less like something an author made up and more like someone who was already there, glimpsed through a page you can't step past. I've felt it at 2 a.m. as a reader, and as someone who writes: the sense that the character knows something I don't, and if I could just *ask* them—
 
-Unlike generic chatbots or writing assistants, NMA treats each character as a unique cognitive entity with evolving traits, behavioral patterns, a relationship network, and a remembered conversation history across sessions.
+NMA is that door. It reads novel text and builds a real cognitive profile for each character — memory, evolving traits, a relationship network, an arc that grows with every conversation and every sleep cycle — then lets you reach across to them in their own voice. As close as I've found a way to get.
 
-The system works with **any fiction**. A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy from Jane Austen's *Pride and Prejudice*; further characters enter through the ingestion pipeline — paste raw novel text and NMA builds their cognitive profiles. The demo's Lena and Caelan Ashmark are from the original Caelvorn Series, showing the same architecture handles both canonical literary figures and original creations equally well. (The Caelvorn Series is the author's own serialized novel — NMA is dogfooded against the exact memory-drift problem it was built to solve.)
+The difference is where the character comes from. Companion apps ask you to write a persona and then act it out with you; what answers is a mask you designed. NMA surfaces the person the book already wrote — traits, contradictions, and history extracted from the text itself. You don't build the character. You meet them.
+
+The demo runs on two novels at once: Elizabeth Bennet and Darcy from *Pride and Prejudice*, and Lena, Mira, and Caelan Ashmark from my own Caelvorn Series — ingested live through the pipeline, straight from my manuscript. NMA is dogfooded against the exact problem it was built to solve: tested on the book that made me need it.
 
 ---
 

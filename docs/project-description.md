@@ -4,7 +4,9 @@
 
 ---
 
-Every fictional character faces the same problem: close the window, and they forget you existed. A chatbot that resets on every reload is not a character — it's a script. NMA gives fictional characters persistent, evolving memory across sessions, so the Elizabeth Bennet you spoke to yesterday remembers what you discussed today.
+There are characters you finish a book and can't stop thinking about — who feel less like something an author made up and more like someone who was already there, on the other side of a page you can't step past. You were never meant to reach them. NMA is a door built to get as close as possible.
+
+The difference from a companion chatbot is where the character comes from. Those apps ask you to write a persona and then act it out with you; what answers is a mask you designed. NMA surfaces the person the book already wrote — memory, traits, contradictions, and history extracted from the text itself, evolving across sessions. You don't build the character. You meet them.
 
 ## What It Does
 
@@ -26,9 +28,9 @@ A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy fro
 
 ## Why It Matters
 
-For readers who have invested hundreds of pages only to watch characters act inconsistently across sequels — consistency isn't a nice-to-have, it's the foundation of an immersive world. For authors managing multi-book series or sprawling casts where every character needs to stay internally coherent. For anyone building AI characters — in games, interactive fiction, or virtual worlds — who needs them to feel like real people with real memories, not scripts that replay on every visit.
+The want is real on both sides of the book. Readers finish a series and keep living with its people — replaying the fork the character didn't take, wishing they could ask why. Authors carry a cast that has to stay coherent across books, and would give anything to check what a character actually knows before writing their next line. Both are reaching for the same thing: a character who is *there* — consistent, remembering, their own — not a script that replays on every visit.
 
-This problem is not hypothetical for me. I write and serialize English-language fiction on Dreame (the Caelvorn Series — Book 1 complete), and memory drift and out-of-character moments across a long narrative are problems I fight as an author every week. NMA's memory architecture comes directly out of that practice — which is why the demo characters Lena and Caelan Ashmark come from my own novel: the system is being tested against the exact problem it was built to solve.
+It isn't hypothetical for me. I serialize the Caelvorn Series on Dreame (Book 1 complete), and I'm the reader at 2 a.m. as often as I'm the writer. That's why the demo characters — Lena, Mira, Caelan Ashmark — are ingested live from my own manuscript: the system is tested against the exact problem it was built to solve. I don't know yet how many people share this want strongly enough to build a product on. I built NMA to find out — starting with the one person I'm certain of.
 
 ## Tech Stack
 
