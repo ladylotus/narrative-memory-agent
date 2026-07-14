@@ -12,7 +12,7 @@ The difference from a companion chatbot is where the character comes from. Those
 
 NMA ingests novel text and builds a cognitive profile for each character — traits, behavior patterns, motivation, arc stage, and relationships. You ask a character a question, and NMA generates 2-5 distinct responses in that character's voice, each scored for how in-character it is. Pick one, and the system learns from your choice.
 
-A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy from *Pride and Prejudice*. Further characters are built by the ingestion pipeline from raw novel text — the demo's Lena and Caelan Ashmark come from my own Caelvorn Series — demonstrating that the same architecture works for both canonical literary figures and original creations.
+A fresh install comes pre-loaded with Elizabeth Bennet and Fitzwilliam Darcy from *Pride and Prejudice*. Further characters are built by the ingestion pipeline from raw novel text — the demo's Lena, Mira, and Caelan Ashmark come from my own Caelvorn Series — demonstrating that the same architecture works for both canonical literary figures and original creations.
 
 ## How It Works
 
